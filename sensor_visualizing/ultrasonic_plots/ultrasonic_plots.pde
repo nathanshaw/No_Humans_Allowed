@@ -11,7 +11,8 @@ int numBots = 3;
 int windowWidth;
 int windowHeight;
 int sensorMaxValue = 255;
-int memorySize = 16;
+int memorySize = 50;
+int memoryLengthInSeconds = 1;
 int windowHHop;
 int totalHHop;
 int totalVHop;
@@ -42,7 +43,7 @@ void setup() {
   windowWidth = int((width - totalHHop)/numSensors);
   windowHeight = int((height - totalVHop)/numBots);
 
-  frameRate(12);
+  frameRate(memorySize/memoryLengthInSeconds);
   // expand pastStates to proper size
   sliders = new Slider[numSensors*numBots];
   for (int b = 0; b < numBots; b++) {
@@ -62,9 +63,6 @@ void keyPressed() {
   if (key == '1') pollSensor(1, 1);
 }
 
-void msgReceived(int sensorNum, int reading) {
-  println(sensorNum, reading);
-}
 // object for a slider
 class Slider {
   int x, y;
@@ -89,7 +87,6 @@ class Slider {
     sliderHeight = tempSliderHeight;
     boarder = initBoarder;
     myIndex = (botNum * numSensors) + sensorNum;
-    //println("pastStates length : ", pastStates.length);
   }
 
   void update() {
@@ -101,36 +98,31 @@ class Slider {
     pastStates[0] = int(float(mostRescentReading[myIndex] + pastStates[1]) / 2.0);
     // no filtering
     pastStates[0] = mostRescentReading[myIndex];
-    print(myIndex, " past states : ");
-    for (int i = 0; i < pastStates.length; i++) {
-      print(pastStates[i], "");
-    }
-    println("");
   }
 
 
 
   void display() {
     // draw the boarder
+    strokeWeight(1);
     rectMode(CORNER);
     fill(255);
     rect(x, y, windowWidth, windowHeight);
     // draw a rect for each datapoint
+    strokeWeight(0);
     for (int r = 0; r < memorySize; r++) {
 
       int tempHHop = int(windowWidth/(memorySize));
       int tempHop = int(tempHHop * r);
       float tempValue = float(pastStates[r]) / float(sensorMaxValue);
       int tempHeight = int(tempValue * windowHeight * -1);
-      if (tempValue < 0.33) {
+      if (tempValue < 0.25) {
         fill(255, 0, 0);
-      } else if (tempValue < 0.67) {
+      } else if (tempValue < 0.60) {
         fill(255, 255, 0);
       } else {
-        //println("temp color : ", tempColor);
         fill(0, 255, 0);
       }
-      // println(sensorMaxValue, " - ", pastStates[r], " tempValue : ", tempValue);
       if (r == memorySize - 1) {
         rect(x + tempHop, y + windowHeight, windowWidth - tempHop, tempHeight);
       } else {
@@ -138,7 +130,6 @@ class Slider {
       }
     }
     // display Text to name the bot
-    // println("sensor num : ", sensorNum, " mod4 : ", sensorNum % 4);
     if ((sensorNum % numSensors) == 0) {
       pushMatrix();
       translate(x - boarder - boarder, y);
@@ -159,7 +150,6 @@ class Slider {
 
 void draw() {
   // make background grey
-  // println(sliders.length);
   for (int b = 0; b < numBots; b++) {
     for (int i = 0; i < numSensors; i++) {
       int index = (b*4) + i;
@@ -175,33 +165,21 @@ void pollSensor(int _whichBot, int _whichSensor) {
   msg.add(_whichSensor);
   msg.add(0);
   osc.send(msg, destAddress);
-  println("sending osc message : ", msg, destAddress);
 }
 
 void oscEvent(OscMessage theOscMessage) {
   String address = theOscMessage.addrPattern();
   int ultraNum = theOscMessage.get(0).intValue();
   int reading = theOscMessage.get(1).intValue();
-  // println("OSC MESSAGE RECEIVED : ", address, ultraNum, reading);
-  //println(theOscMessage.addrPattern());
   int offset = 0;
   if (address.equals("/theia1")) {
-    // println("INCOMMING OSC : ", ultraNum, " - ", reading);
     // TODO, need to add in support for nultiple bots...
     offset = 0;    
     mostRescentReading[offset + ultraNum] = reading;
-    println(offset + ultraNum, " reading is : ", mostRescentReading[offset + ultraNum]);
-  } 
-  else if (address.equals("/theia2")) {
-    // println("INCOMMING OSC : ", ultraNum, " - ", reading);
-    // TODO, need to add in support for nultiple bots...
+  } else if (address.equals("/theia2")) {
     offset = numSensors;
-  }
-  else if (address.equals("/theia3")) {
-    // println("INCOMMING OSC : ", ultraNum, " - ", reading);
-    // TODO, need to add in support for nultiple bots...
+  } else if (address.equals("/theia3")) {
     offset = numSensors * 2;
   }
   mostRescentReading[offset + ultraNum] = reading;
-  println(offset + ultraNum, " reading is : ", mostRescentReading[offset + ultraNum]);
 }
