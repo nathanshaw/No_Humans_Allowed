@@ -19,108 +19,125 @@ oin.listenAll();
 // if someone is really close the state is 2: agressive
 // if someone is sort of close the state is 1: quiet and timid
 // if someone if not detected, the state is 0: productive
-[0, 0, 0] @=> int botState[];
+
+// this is the state of each sensor on the first bot
+[0, 0, 0, 0] @=> int bot1State[];
+[0, 0, 0, 0] @=> int bot2State[];
+[0, 0, 0, 0] @=> int bot3State[];
 
 // if distance is less than midThresh, bot will enter
 // into state 1. This might have to be adjusted according to
 // the space
-135 => int lowMidThresh;
+115 => int lowMidThresh;
 150 => int highMidThresh;
+50 => int lowCloseThresh;
+75 => int highCloseThresh;
+// the smoothing weights are universal
+[0.5, 0.3, 0.1, 0.1, 0, 0, 0, 0] @=> float smoothingWeights[];
 
-80 => int lowCloseThresh;
-95 => int highCloseThresh;
+// each sensor gets its own array
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b1pastStates1[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b1pastStates2[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b1pastStates3[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b1pastStates4[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b2pastStates1[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b2pastStates2[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b2pastStates3[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b2pastStates4[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b3pastStates1[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b3pastStates2[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b3pastStates3[];
+[150, 150, 150, 150, 150, 150, 150, 150] @=> int b3pastStates4[];
 
-// keeps track of how many times the
-// bot enters into state 2,
-// if it enters into state 2
-0 => int times_fed;
-6 => int how_hungry;
-now => time last_fed;
-7000::ms => dur feeding_dur;
+[150, 150, 150, 150] @=> int b1smoothedStates[];
 
-[150, 150, 150, 150, 150, 150, 150, 150] @=> int pastStates1[];
-[150, 150, 150, 150, 150, 150, 150, 150] @=> int pastStates2[];
-[150, 150, 150, 150, 150, 150] @=> int pastStates3[];
-
-[150, 150, 150] @=> int slowStates[];
-
-[0.4, 0.2, 0.1, 0.1, 0.1, 0.1] @=> float smoothingWeights[];
-
-fun void newReading(int whatBot, int reading) {
+fun void newReading(int whatBot, int whatSensor, int reading) {
     // often get random 5's
-    if (reading > 10 && reading < 240) {
+    // if (reading > 10 && reading < 240) {
+    // if reading is 200 difference, only take current reading + 25
     if (whatBot == 1) {
-        for (4 => int i; i >= 0; i--) {
-            pastStates1[i] => pastStates1[i+1];
+        if (whatSensor == 0) {
+            for (6 => int i; i >= 0; i--) {
+                b1pastStates1[i] => b1pastStates1[i+1];
+            }
+            if (reading - b1pastStates1[1] < -200){
+                b1pastStates1[0] - 25 => reading;
+            }
+            else if(reading - b1pastStates1[1] > 200){
+                b1pastStates1[0] + 25 => reading; 
+            }
+            reading => b1pastStates1[0];
+            
         }
-        reading => pastStates1[0];
-        if (reading > slowStates[0]) {
-            slowStates[0] + 2 => slowStates[0];
+        else if (whatSensor == 1) {
+            for (6 => int i; i >= 0; i--) {
+                b1pastStates2[i] => b1pastStates2[i+1];
+            }
+            if (reading - b1pastStates2[1] < -200){
+                b1pastStates2[0] - 25 => reading;
+            }
+            else if(reading - b1pastStates2[1] > 200){
+                b1pastStates2[0] + 25 => reading; 
+            }
+            reading => b1pastStates2[0];
+            
         }
-        else if (reading < slowStates[0]) {
-            slowStates[0] - 2 => slowStates[0]; 
+        else if (whatSensor == 2) {
+            for (6 => int i; i >= 0; i--) {
+                b1pastStates3[i] => b1pastStates3[i+1];
+            }
+            if (reading - b1pastStates3[1] < -200){
+                b1pastStates3[0] - 25 => reading;
+            }
+            else if(reading - b1pastStates3[1] > 200){
+                b1pastStates3[0] + 25 => reading; 
+            }
+            reading => b1pastStates3[0];
+            
         }
-    }
-    else if (whatBot == 2) {
-        for (4 => int i; i >= 0; i--) {
-            pastStates2[i] => pastStates2[i+1];
+        else if (whatSensor == 3) {
+            for (6 => int i; i >= 0; i--) {
+                b1pastStates4[i] => b1pastStates4[i+1];
+            }
+            if (reading - b1pastStates4[1] < -200){
+                b1pastStates4[0] - 25 => reading;
+            }
+            else if(reading - b1pastStates4[1] > 200){
+                b1pastStates4[0] + 25 => reading; 
+            }
+            reading => b1pastStates4[0];
+            
         }
-        reading => pastStates2[0];
-        if (reading > slowStates[1]) {
-            slowStates[1] + 2 => slowStates[1];
-        }
-        else if (reading < slowStates[0]) {
-            slowStates[1] - 2 => slowStates[1]; 
-        }
-    }
-    else if (whatBot == 3) {
-        for (4 => int i; i >= 0; i--) {
-            pastStates3[i] => pastStates3[i+1];
-        }
-        reading => pastStates3[0];
-        if (reading > slowStates[2]) {
-            slowStates[2] + 2 => slowStates[2];
-        }
-        else if (reading < slowStates[2]) {
-            slowStates[2] - 2 => slowStates[2]; 
-        }
-    }
+        getSmoothedDistance(whatBot, whatSensor) => b1smoothedStates[whatSensor];
+        // }
     }
 }
 
-fun void outro(){
-    for (650 => float i; i > 5; i * 0.988 => i){
-        i $ int => int ii;
-        spork ~ productive2(ii*2);
-        spork ~ productive2(ii);
-        (i)::ms => now;
-    }
-    <<<"VERY END">>>;
-    // very end
-    for (1000 => float i; i < 15000; i * 1.15 => i){
-        triggerAllRhythmic(i$int);
-    }
-    <<<"DONE!!!!">>>;
-}
-
-
-fun int getSmoothedDistance(int whatBot) {
+fun int getSmoothedDistance(int whatBot, int whatSensor) {
     float distance;
     int returnValue;
     if (whatBot == 1) {
-        for (int i; i < 6; i++){
-            pastStates1[i] * smoothingWeights[i] +=> distance;
+        if (whatSensor == 0) {
+            for (int i; i < 8; i++){
+                b1pastStates1[i] * smoothingWeights[i] +=> distance;
+            }
         }
-    }
-    else if (whatBot == 2) {
-        for (int i; i < 6; i++){
-            pastStates2[i] * smoothingWeights[i] +=> distance;
+        else if (whatSensor == 1) {
+            for (int i; i < 8; i++){
+                b1pastStates2[i] * smoothingWeights[i] +=> distance;
+            }
         }
-    }
-    else if (whatBot == 3) {
-        for (int i; i < 6; i++){
-            pastStates3[i] * smoothingWeights[i] +=> distance;
+        else if (whatSensor == 2) {
+            for (int i; i < 8; i++){
+                b1pastStates3[i] * smoothingWeights[i] +=> distance;
+            }
         }
+        else if (whatSensor == 3) {
+            for (int i; i < 8; i++){
+                b1pastStates4[i] * smoothingWeights[i] +=> distance;
+            }
+        }
+        
     }
     distance $ int => returnValue;
     return returnValue;
@@ -138,53 +155,33 @@ fun void oscrecv() {
             msg.getInt(0) => int sensorNum;
             msg.getInt(1) => int distance;
             // theia1 is for bot 1 (the first bot)
-            
-            //<<<"received OSC message : ", msg>>>;
+            //<<<"received OSC message : ", address, " ", sensorNum, " ", distance>>>;
             if (address == "/theia1"){
-                pOut.start(address);
+                // immedietly send the data over to processing for analysis
+                // process the message
+                newReading(1, sensorNum, distance);
+                getSmoothedDistance(1, sensorNum) => int smoothedDistance => b1smoothedStates[sensorNum]; 
+                //<<<"smoothed distance : ", smoothedDistance>>>;               
+                pOut.start("/theia1");
                 pOut.add(sensorNum);
-                pOut.add(distance);
+                pOut.add(smoothedDistance);
                 pOut.send();
-                newReading(1, distance);
-                getSmoothedDistance(1);
-                
-                pOut.start("/theia2");
-                pOut.add(sensorNum);
-                (pastStates1[0] + pastStates1[1])/2 $ int => pastStates1[0];
-                pOut.add(pastStates1[0]);
-                pOut.send();
-                
-                pOut.start("/theia3");
-                pOut.add(sensorNum);
-                pOut.add(slowStates[0]);
-                pOut.send();
-                //<<<sensorNum, " distance : ", distance, "smoothed : ", 
-                //slowStates[0], " - state - ", botState[0], "num times fed - ", times_fed>>>;
-                if (slowStates[0] >= highMidThresh && botState[0] != 0) {
-                    0 => botState[0];
-                    <<<"bot1 state changed to : ", botState[0]>>>;
+                // cycle through the four ultrasonic slowStates and change the overall state                
+                if (smoothedDistance >= highMidThresh && bot1State[sensorNum] != 0) {
+                    0 => bot1State[sensorNum];
+                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[0]>>>;
                 }
-                else if (slowStates[0] >= highCloseThresh && slowStates[0] < lowMidThresh &&
-                botState[0] != 1) {
-                    1 => botState[0];
-                    <<<"bot1 state changed to : ", botState[0]>>>;
+                else if (smoothedDistance >= highCloseThresh && smoothedDistance < lowMidThresh &&
+                bot1State[sensorNum] != 1) {
+                    1 => bot1State[sensorNum];
+                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
                 } 
-                else if (botState[0] != 2 && slowStates[0] < lowCloseThresh) {
-                    2 => botState[0];
-                    <<<"bot1 state changed to : ", botState[0]>>>;
-                    if (now > last_fed + feeding_dur){
-                        now => last_fed;
-                        times_fed++;
-                        <<<"TIMES FED : ", times_fed>>>;
-                        if (times_fed % 10 == 0){
-                            outro();
-                        }
-                    }
-                    else {
-                        <<<"were just fed, ignoring message">>>;   
-                    }
-                } 
+                else if (bot1State[sensorNum] != 2 && smoothedDistance < lowCloseThresh) {
+                    2 => bot1State[sensorNum];
+                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
+                }
             }
+            
         }
     }
 }
@@ -248,51 +245,63 @@ fun void pollUltrasonics() {
     while(true) {
         for (int i; i < 4; i++){
             spork ~ getTheiaDistance(1, i);
-            50::ms => now;
+            10::ms => now;
             //<<<"getting theia1 distance : ", i>>>;
         }
     }   
 }
 
-fun void triggerAll(int maxDelay) {
+fun void triggerAll(int sensorNum, int maxDelay) {
     (maxDelay / 6) $ int => int delay;
-    for (int t; t < 6; t++){
-        for (int i; i < 6; i++){
-            spork ~ smallSolinoids(i+60, 50, 30);
-            spork ~ rotarySolinoids(i+60, 10, 30);
-            spork ~ largeSolinoids(i+60, 10, 30);
-        }   
+    if (sensorNum == 2) {
+        for (int t; t < 6; t++){
+            for (int i; i < 6; i++){
+                spork ~ rotarySolinoids(i+60, 50, 600);
+            }
+            delay::ms => now;   
+        }
     }
-    Math.random2(10, delay)::ms => now; 
+    else if (sensorNum == 1) {
+        for (int t; t < 6; t++){
+            for (int i; i < 6; i++){
+                spork ~ smallSolinoids(i+60, 50, 600);
+            }
+            delay::ms => now;   
+        }
+    }
+    if (sensorNum == 0) {
+        for (int t; t < 6; t++){
+            for (int i; i < 6; i++){
+                spork ~ largeSolinoids(i+60, 50, 600);
+            }
+            delay::ms => now;   
+        }
+    }
+    if (sensorNum == 3) {
+        for (int t; t < 6; t++){
+            for (int i; i < 6; i++){
+                spork ~ rotarySolinoids(i+60, 50, 600);
+            }
+            delay::ms => now;   
+        }
+    }
 }
 
-fun void triggerAllRhythmic(int maxDelay) {
-    (maxDelay / 6) $ int => int delay;
-    for (int i; i < 6; i++){
-        spork ~ smallSolinoids(i+60, 20, 30);
-        spork ~ rotarySolinoids(i+60, 10, 30);
-        spork ~ largeSolinoids(i+60, 5, 30);      
-    }   
-    delay::ms => now; 
-}
-
-fun void productive1(int delayTime){
+fun void productive1(int bank, int delayTime){
     delayTime/6 => float inbetween_time;
     for (int i; i < 6; i++){
         // only trigger gods 1 for 'intro'
-        if (times_fed < 2){
-            spork ~ largeSolinoids(i+60, 10, 30);
+        if (bank == 0 | bank == 3){
+            spork ~ smallSolinoids(i+60,  4, 35);            
         }
         // trigger two durring the 'main' section
-        else if (times_fed < 5) {
-            spork ~ smallSolinoids(i+60,  4, 30);
-            spork ~ rotarySolinoids(i+60, 30, 20);
+        else if (bank == 2) {
+            spork ~ largeSolinoids(i+60, 10, 40);
+            
         }
         // trigger them all at the 'outro'
-        else {
-            spork ~ smallSolinoids(i+60,  4, 30);
-            spork ~ rotarySolinoids(i+60, 50, 20);
-            spork ~ largeSolinoids(i+60, 20, 40);            
+        else if (bank == 1) {
+            spork ~ rotarySolinoids(i+60, 30, 30);
         }
         inbetween_time::ms => now;
     }   
@@ -322,72 +331,44 @@ spork ~ pollUltrasonics();
 // the "velocity" of productive1()
 0.5::second => dur segment;
 now => time past_time;
-1100 => int speed;
-now => time next_trigger;
+1000 => int speed;
+[now, now, now, now] @=> time next_trigger[];
 dur delay_time;
 now => time current_time;
 // composition starts out with a speed of around 1000, goes down to 50 at end
 
-/*
-while(times_fed < how_hungry) {
+while(1) {
     now => current_time;
-    if (current_time > past_time + segment){
-        now => past_time; 
-        if (speed >= 50){ 
-            speed--;
-            if (speed % 50 == 0){
-                <<<speed>>>;
-            }
+    // only look at bot 1 for now
+    for (int i; i < 4; i++) { 
+        if (bot1State[i] == 0 && current_time > next_trigger[i]){
+            <<<" bot entering into productive state : ", i, " - ", bot1State[i]>>>;
+            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            <<<"--------------------">>>;
+            spork ~ productive1(i, speed); 
+            now + delay_time => next_trigger[i];
+            speed::ms => delay_time;
+        }
+        else if (bot1State[i] == 2 && current_time > next_trigger[i]) {
+            <<<"bot entering into angry state : ", i, " - ", bot1State[i]>>>;
+            spork ~ triggerAll(i, speed);    
+            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            now + delay_time => next_trigger[i];
+            speed::ms => delay_time;
+        }
+        else if (bot1State[i] == 1 && current_time > next_trigger[i]){
+            <<<i, "bot entering into dormant state">>>;
+            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            now + delay_time => next_trigger[i]; 
+            speed::ms => delay_time;       
+        }
+        else {
+            //<<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            //spork ~ stairwayToHeavan(Math.random2(0,4), Math.random2(100,1000));
+            5::ms => now;
         }
     }
-    // only look at bot 1 for now
-    0 => int i;
-    if (botState[i] == 1 && current_time > next_trigger){
-        //<<<i, " bot entering into productive state : ", i, " - ", botState[i]>>>;
-        //speed::ms => delay_time;
-        spork ~ productive1(speed); 
-        now + delay_time => next_trigger;
-        speed::ms => delay_time;
-    }
-    else if (botState[i] == 2 && current_time > next_trigger) {
-        //<<<i, "bot entering into angry state : ", i, " - ", botState[i]>>>;
-        spork ~ triggerAll(speed);    
-        now + delay_time => next_trigger;
-        speed::ms => delay_time;
-    }
-    else if (botState[i] == 0 && current_time > next_trigger){
-        //<<<i, "bot entering into dormant state">>>;
-        now + delay_time => next_trigger; 
-        speed::ms => delay_time;       
-    }
-    else {
-        //spork ~ stairwayToHeavan(Math.random2(0,4), Math.random2(100,1000));
-        5::ms => now;
-    }
 }
-
-// test solinoids and leds
-while(1){
-for (60 => int i; i < 66; i++){
-    rotarySolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-for (60 => int i; i < 66; i++){
-        smallSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-for (60 => int i; i < 66; i++){
-    largeSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-for (60 => int i; i < 66; i++){
-    rotarySolinoids(i, 60, 30);
-    smallSolinoids(i, 60, 30);
-    largeSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-}
-*/
-1::day => now;
-// now either the composition can end or
-// there can be a pre-composed outro for it

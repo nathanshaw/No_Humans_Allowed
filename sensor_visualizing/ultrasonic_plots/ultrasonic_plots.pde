@@ -7,12 +7,12 @@ OscP5 osc;
 
 // make a bar for each sensor on each bot
 int numSensors = 4;
-int numBots = 3;
+int numBots = 1;
 int windowWidth;
 int windowHeight;
 int sensorMaxValue = 255;
-int memorySize = 50;
-int memoryLengthInSeconds = 1;
+int memorySize = 64;
+int memoryLengthInSeconds = 2;
 int windowHHop;
 int totalHHop;
 int totalVHop;
@@ -31,7 +31,7 @@ Slider[] sliders;
 NetAddress destAddress;
 
 void setup() {
-  size(800, 600);
+  size(1200, 300);
   osc = new OscP5(this, 50010);
   destAddress = new NetAddress("127.0.0.1", 50000);
   windowHHop = int((width / 15) - numSensors);
@@ -153,7 +153,6 @@ void draw() {
   for (int b = 0; b < numBots; b++) {
     for (int i = 0; i < numSensors; i++) {
       int index = (b*4) + i;
-      //println("updating index : ", index);
       sliders[index].update();
       sliders[index].display();
     }
@@ -177,9 +176,9 @@ void oscEvent(OscMessage theOscMessage) {
     offset = 0;    
     mostRescentReading[offset + ultraNum] = reading;
   } else if (address.equals("/theia2")) {
-    offset = numSensors;
+    offset = numSensors - 1;
   } else if (address.equals("/theia3")) {
-    offset = numSensors * 2;
+    offset = numSensors * 2 - 1;
   }
   mostRescentReading[offset + ultraNum] = reading;
 }
