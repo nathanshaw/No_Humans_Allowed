@@ -1,4 +1,4 @@
-.DS_Store
+*.DS_Store
 applet
 application.linux32
 application.linux64

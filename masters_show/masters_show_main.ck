@@ -169,16 +169,16 @@ fun void oscrecv() {
                 // cycle through the four ultrasonic slowStates and change the overall state                
                 if (smoothedDistance >= highMidThresh && bot1State[sensorNum] != 0) {
                     0 => bot1State[sensorNum];
-                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[0]>>>;
+                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[0]>>>;
                 }
                 else if (smoothedDistance >= highCloseThresh && smoothedDistance < lowMidThresh &&
                 bot1State[sensorNum] != 1) {
                     1 => bot1State[sensorNum];
-                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
+                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
                 } 
                 else if (bot1State[sensorNum] != 2 && smoothedDistance < lowCloseThresh) {
                     2 => bot1State[sensorNum];
-                    <<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
+                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
                 }
             }
             
@@ -258,7 +258,7 @@ fun void triggerAll(int sensorNum, int maxDelay) {
             for (int i; i < 6; i++){
                 spork ~ rotarySolinoids(i+60, 50, 600);
             }
-            delay::ms => now;   
+            Math.random2f(0.5*delay, delay*1.5)::ms => now;   
         }
     }
     else if (sensorNum == 1) {
@@ -266,7 +266,7 @@ fun void triggerAll(int sensorNum, int maxDelay) {
             for (int i; i < 6; i++){
                 spork ~ smallSolinoids(i+60, 50, 600);
             }
-            delay::ms => now;   
+            Math.random2f(0.5*delay, delay*1.5)::ms => now;   
         }
     }
     if (sensorNum == 0) {
@@ -274,7 +274,7 @@ fun void triggerAll(int sensorNum, int maxDelay) {
             for (int i; i < 6; i++){
                 spork ~ largeSolinoids(i+60, 50, 600);
             }
-            delay::ms => now;   
+            Math.random2f(0.5*delay, delay*1.5)::ms => now;     
         }
     }
     if (sensorNum == 3) {
@@ -282,7 +282,7 @@ fun void triggerAll(int sensorNum, int maxDelay) {
             for (int i; i < 6; i++){
                 spork ~ rotarySolinoids(i+60, 50, 600);
             }
-            delay::ms => now;   
+            Math.random2f(0.5*delay, delay*1.5)::ms => now;    
         }
     }
 }
@@ -291,16 +291,16 @@ fun void productive1(int bank, int delayTime){
     delayTime/6 => float inbetween_time;
     for (int i; i < 6; i++){
         // only trigger gods 1 for 'intro'
-        if (bank == 0 | bank == 3){
-            spork ~ smallSolinoids(i+60,  4, 35);            
+        if (bank == 2){
+            spork ~ smallSolinoids(i+60,  10, 35);            
         }
         // trigger two durring the 'main' section
-        else if (bank == 2) {
-            spork ~ largeSolinoids(i+60, 10, 40);
+        else if (bank == 0) {
+            spork ~ largeSolinoids(i+60, 20, 40);
             
         }
         // trigger them all at the 'outro'
-        else if (bank == 1) {
+        else if (bank == 1 | bank == 3) {
             spork ~ rotarySolinoids(i+60, 30, 30);
         }
         inbetween_time::ms => now;
@@ -331,7 +331,7 @@ spork ~ pollUltrasonics();
 // the "velocity" of productive1()
 0.5::second => dur segment;
 now => time past_time;
-1000 => int speed;
+900 => float speed;
 [now, now, now, now] @=> time next_trigger[];
 dur delay_time;
 now => time current_time;
@@ -342,26 +342,29 @@ while(1) {
     // only look at bot 1 for now
     for (int i; i < 4; i++) { 
         if (bot1State[i] == 0 && current_time > next_trigger[i]){
-            <<<" bot entering into productive state : ", i, " - ", bot1State[i]>>>;
-            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
-            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
-            <<<"--------------------">>>;
-            spork ~ productive1(i, speed); 
+            //<<<" bot entering into productive state : ", i, " - ", bot1State[i]>>>;
+            //<<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            //<<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            //<<<"--------------------">>>;
+            spork ~ productive1(i, speed $ int); 
             now + delay_time => next_trigger[i];
             speed::ms => delay_time;
+            
         }
         else if (bot1State[i] == 2 && current_time > next_trigger[i]) {
-            <<<"bot entering into angry state : ", i, " - ", bot1State[i]>>>;
-            spork ~ triggerAll(i, speed);    
-            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
-            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            //<<<"bot entering into angry state : ", i, " - ", bot1State[i]>>>;
+            spork ~ triggerAll(i, speed $ int);    
+            //<<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            //<<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
             now + delay_time => next_trigger[i];
             speed::ms => delay_time;
+            //speed * Math.random2f(0.97, 1.03) => speed;
+            //<<<"new speed : ", speed>>>;
         }
         else if (bot1State[i] == 1 && current_time > next_trigger[i]){
-            <<<i, "bot entering into dormant state">>>;
-            <<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
-            <<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
+            //<<<i, "bot entering into dormant state">>>;
+            //<<<bot1State[0], "-",bot1State[1], "-",bot1State[2], "-",bot1State[3]>>>;
+            //<<<b1smoothedStates[0], "-",b1smoothedStates[1], "-",b1smoothedStates[2], "-",b1smoothedStates[3]>>>;
             now + delay_time => next_trigger[i]; 
             speed::ms => delay_time;       
         }
