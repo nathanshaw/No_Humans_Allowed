@@ -292,11 +292,11 @@ fun void productive1(int bank, int delayTime){
     for (int i; i < 6; i++){
         // only trigger gods 1 for 'intro'
         if (bank == 2){
-            spork ~ smallSolinoids(i+60,  10, 35);            
+            spork ~ smallSolinoids(i+60,  20, 35);            
         }
         // trigger two durring the 'main' section
         else if (bank == 0) {
-            spork ~ largeSolinoids(i+60, 20, 40);
+            spork ~ largeSolinoids(i+60, 40, 40);
             
         }
         // trigger them all at the 'outro'
@@ -331,7 +331,7 @@ spork ~ pollUltrasonics();
 // the "velocity" of productive1()
 0.5::second => dur segment;
 now => time past_time;
-900 => float speed;
+1200 => float speed;
 [now, now, now, now] @=> time next_trigger[];
 dur delay_time;
 now => time current_time;
