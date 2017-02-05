@@ -29,4 +29,6 @@ public class  Personality
     fun void setHermes(int num) {
         Hermes hermes[num];
     }
+
+
 }

@@ -2,7 +2,8 @@
 // Nathan Villicana-Shaw
 
 public class Theia extends SensorBot{
-    int pastSensorReadings[4][8];
+    8 => int sensorMemory;
+    int pastSensorReadings[4][sensorMemory];
     int smoothedReadings[4];
 
     int ID;
