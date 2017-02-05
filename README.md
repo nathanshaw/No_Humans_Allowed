@@ -2,33 +2,47 @@
 Repo for housing the No Humans Allowed Installation
 ------------
 
-3 stationary bots
+Arduino ID's
+------------
+The Arduino ID's consist of three bytes
+The first byte corresponds with the Bot it is associated with
+    1   : MainBot
+    2-3 : Secondary Bots
+    4-6 : Motor Mobile
+    7-9 : Eye Bots
+The second byte corresponds with the Type of Shield it is
+    1   : Brigid
+    2   : Homados
+    3   : Hermes
+    4   : Theia
+The last byte corresponds with the board number (if it is the third brigid this will be 3)
+
+For example the Brigid boards on the second secondary bot will have the following ID's :
+311, 312, 313, 314
+
+
+Bots
+----
+3x stationary bots
+3x mobile bots
 
 1x Main Bot
 -----------
-4 ultrasonics,
+4x ultrasonics,
 3x banks of 6 solinoids
-1x bank of 4x stepper motors
+3x banks of 6 LED strips
 
 2x Secondary Bots
 ---------------------------
-2 ultrasonics
+4x ultrasonics
 2x banks of 6 solinoids
+2x banks of 6 LED Strips
 1x bank of 16 solinoids
+1x bank of 16 LED Strips
 
 3x Mobile Bots
 --------------
 1x bank of 6x DC motots
-
-Divine Council Server (controlling bots)
-----------------------------------------
-10x Brigid
- 2x Hermes
- 2x Homados
-
-Sensor Server
--------------
-3x Theia (ultrasonics)
 
 Interaction Rail
 ----------------
