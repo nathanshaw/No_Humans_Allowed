@@ -1,19 +1,32 @@
-public class Theia
-{
-    4 => int sensors;
-    // loads into array to set a default reading when initalized
-    150 => int defaultReading;
-    // how many past states to keep a hold of
-    8 => int memorySize;
-    // array to hold sensor values
-    int readings[0];
-    memorySize => readings.size;
-    
-    fun int weightedAverage() {
-        // return weighted average 
+// Theia.ck
+// Nathan Villicana-Shaw
+
+public class Theia extends SensorBot{
+    int pastSensorReadings[4][8];
+    int smoothedReadings[4];
+
+    int ID;
+
+    fun void setID(int id, string stringID) {
+        id => ID;
+        "/theia/" + stringID => string address;
+        IDCheck(ID, address) => int check;
+        // if a message comes in to the bot, return the distances
+        int distance;
+        if (check >= 0) {
+            spork ~ oscrecv(check, address);
+        }
     }
-    fun int onePole() {
-        // return single pole lowpass
+
+    fun void smoothReadings() {
+        for (int i; i < smoothReadings.size(); i++) {
+            smoothReadings[i] = pastSensorReadings[i][0];
+        }
     }
-    
+
+    fun void newReading(int sensorNum, int reading) {
+        for (int i; i < pastSensorReadings[sensorNum].size(); i++){
+            <<<"DUMMY CODE?">>>;
+        }
+    }
 }
