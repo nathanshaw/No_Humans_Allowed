@@ -43,3 +43,10 @@ Interaction Rail
 
 3 - Once noone is detected again the bot will return 
   to normal operation
+
+How to Operate
+---------------
+1. All of the USB hubs have to be turned on for each bot
+2. Run serial-robot-server/master.ck
+3. Run midi-robot-server/master.ck
+4. Run no-humans-allowed/master

@@ -1,10 +1,8 @@
 /*
-bot_control.ck
+no-humans-allowed.ck
 
-This file holds classes for interfacing with the 
-Divine Council Bots
+This file provides the compositional logic for no-humans-allowed.ck
 
-TODO for composition
 */
 OscOut out;
 OscOut pOut;
