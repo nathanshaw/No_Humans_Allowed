@@ -1,5 +1,18 @@
 // main.ck
 // CalArts Music Tech // MTIID4LIFE
+/*
+
+1. Handshake, figure out the ID's for each of the arduinos
+2. Assign shilds to personalities which orchestrate the actuators
+    2.1 Each personality polls the Theia for distances
+    2.2 Each personality triggers the solenoids according to its state
+
+3. Launch a listener that listens to responces from theia bots
+    3.0 Listener script takes care of smoothing, keeping track of distances and the states
+    of bots
+    3.1 when a bot should enter into a state it is the listener that tells them
+    to enter into that state.
+*/
 
 // give it some time to breathe
 HandshakeID talk;
@@ -8,8 +21,10 @@ HandshakeID talk;
 // initial handshake between ChucK and Arduinos
 talk.talk.init();
 1::second => now;
-
+<<<"found a total of ", talk.talk.returnNumRobotID(), " bots">>>;
 <<< "Handshakes done" >>>;
+<<<"----------------">>>;
+
 // bring on the bots
 Personality bots[3];
 
@@ -32,15 +47,18 @@ bots[2].setHomados(2);
 // if someone is sort of close the state is 1: quiet and timid
 // if someone if not detected, the state is 0: productive
 [0, 0, 0] @=> int botMood[];
-
-fun void moodRipple() {
-    // conducts logic for mood
-    // if one is agressive, make the productive ones quiet
+int arduinoIDs[talk.talk.returnNumRobotID()];
+for (0 => int i; i < talk.talk.returnNumRobotID(); i++) {
+    talk.talk.returnRobotID(i) => arduinoIDs[i];
 }
-
-while (true) {
-    1::second => now;
-    moodRipple();
+for (0 => int i; i < arduinoIDs.cap(); i++) {
+    // figure out the bots
+    for (bots.cap() => int botNum; botNum > 0; botNum--) {
+        if ((arduinoIDs[i] / 100) > botNum) {
+            <<<"BOARD BELONGS TO BOTNUM (index 0) : ", 
+                botNum, " - ", arduinoIDs[i]>>>;
+        }
+    }
 }
 
 /*
@@ -48,7 +66,6 @@ no-humans-allowed.ck
 
 This file provides the compositional logic for no-humans-allowed.ck
 
-*/
 OscOut out;
 OscOut pOut;
 OscIn oin;
@@ -59,51 +76,6 @@ OscMsg msg;
 oin.listenAll();
 
 
-// listener for receiving sensor information
-fun void oscrecv() {
-    // theia 1 - main bot
-    // theia 2 - second bot
-    // theia 3 - third bot
-    while(true) {
-        oin => now;
-        while(oin.recv(msg)) {
-            msg.address => string address;
-            msg.getInt(0) => int sensorNum;
-            msg.getInt(1) => int distance;
-            // theia1 is for bot 1 (the first bot)
-            //<<<"received OSC message : ", address, " ", sensorNum, " ", distance>>>;
-            if (address == "/theia"){
-                // first argument is the bot num
-                // second argument is the sensorNum
-                // third argument is the distance
-
-                // immedietly send the data over to processing for analysis
-                // process the message
-                newReading(1, sensorNum, distance);
-                getSmoothedDistance(1, sensorNum) => int smoothedDistance => b1smoothedStates[sensorNum]; 
-                //<<<"smoothed distance : ", smoothedDistance>>>;
-                pOut.start("/theia1");
-                pOut.add(sensorNum);
-                pOut.add(smoothedDistance);
-                pOut.send();
-                // cycle through the four ultrasonic slowStates and change the overall state
-                if (smoothedDistance >= highMidThresh && bot1State[sensorNum] != 0) {
-                    0 => bot1State[sensorNum];
-                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[0]>>>;
-                }
-                else if (smoothedDistance >= highCloseThresh && smoothedDistance < lowMidThresh &&
-                bot1State[sensorNum] != 1) {
-                    1 => bot1State[sensorNum];
-                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
-                } 
-                else if (bot1State[sensorNum] != 2 && smoothedDistance < lowCloseThresh) {
-                    2 => bot1State[sensorNum];
-                    //<<<"bot1 sensor ", sensorNum, " state changed to : ", bot1State[sensorNum]>>>;
-                }
-            }
-        }
-    }
-}
 
 fun void pollUltrasonics() {
     while(true) {
@@ -151,3 +123,4 @@ while(1) {
         }
     }
 }
+*/

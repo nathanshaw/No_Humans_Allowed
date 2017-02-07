@@ -1,10 +1,9 @@
 // Handshake.ck
-// Eric Heep
+// Nathan Villicana-Shaw based off code written by Eric Heep
 // communicates with the Arduinos, pairs them up with the ports
-// CalArts Music Tech // MTIID4LIFE
+// Spring 2017
 
 public class Handshake { 
-
     // for sending sensor data to clients
     OscOut out;
     OscMsg msg;
@@ -16,7 +15,15 @@ public class Handshake {
     // calls num_ports() to find how many USB ports are available
     SerialIO serial[num_ports()];
     int robotID[serial.cap()];
+
+    fun int returnNumRobotID() {
+        return robotID.cap();
+    }
     
+    fun int returnRobotID(int index) {
+        return robotID[index];
+    }
+
     fun void init() { 
         for (int i; i < robotID.cap(); i++) {
             i => robotID[i];
@@ -60,41 +67,22 @@ public class Handshake {
     
     // pings the Arduinos and returns their 'arduinoID'
     fun void handshake() {
+        <<<"Starting Handshake">>>;
         [255, 255, 255] @=> int ping[];
         for (int i ; i < serial.cap(); i++) {
+            <<<"Looking at serial port : ", i>>>;
             serial[i].writeBytes(ping);
             serial[i].onByte() => now;
+            serial[i].getByte() => int botID;
+            serial[i].onByte() => now;
+            serial[i].getByte() => int botType;
+            serial[i].onByte() => now;
             serial[i].getByte() => int arduinoID;
-            <<<"Port ", i, "has arduino id : ", arduinoID>>>;
-            arduinoID => robotID[i];
+            (botID*100) + (botType*10) + (arduinoID) => robotID[i];
+            <<<"ROBOT ID : ", robotID[i]>>>;
+            <<<"- - - - - - - - - - - - - - -">>>;
         }
     }
-    
-    // request data from arduino
-    fun int getTheiaState(int ID, int command, int vel, string address) {
-        [255, command, 0] @=> int message[];
-        253 => int distance;
-        (command << 2) | (vel >> 8) => message[1]; 
-        // <<<ID, " sending message : ", message[0], "-", 
-        //   message[1], "-", message[2]>>>;
-        serial[ID].writeBytes(message);
-        // expect the results from 8 rangefinders
-        serial[ID].onByte() => now;
-        serial[ID].getByte() => int parity;
-        serial[ID].onByte() => now;
-        serial[ID].getByte() => distance;
-        //<<<"incomming parity : ", parity, " Distance : ", distance>>>;
-        if (parity == 0xFF) {
-            //<<<address , " distance is : ", distance, " command is : ", command>>>; 
-            // if someone is relativly close, pass message onto the main program
-            out.start(address);
-            out.add(command);
-            out.add(distance);
-            out.send();
-        }
-        return distance;
-    }
-    
     // bitwise operations, allows note numbers 0-63 and note velocities 0-1023
     fun void note(int ID, int num, int vel) {
         // <<<"sending note : ", ID, " - ", num, " - ", vel>>>;

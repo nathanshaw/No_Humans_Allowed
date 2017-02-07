@@ -83,8 +83,9 @@ public class SensorBot {
                     //    note, " ", msg.getInt(1)>>>;
                     int data;
                     if (note >= 0) {
-                        talk.talk.getTheiaState(port, note, 
-                                                msg.getInt(1), address) => data;
+                        // talk.talk.getTheiaState(port, note, 
+                        //                        msg.getInt(1), address) => data;
+                        <<<"Asking theia for state">>>;
                     }
                     else {
                         <<< msg.getInt(0), "is not an accepted note number for", address, "" >>>;

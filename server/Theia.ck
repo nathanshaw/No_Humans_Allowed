@@ -3,8 +3,12 @@
 
 public class Theia extends SensorBot{
     8 => int sensorMemory;
-    int pastSensorReadings[4][sensorMemory];
-    int smoothedReadings[4];
+    4 => int activeSensors;
+
+    int pastSensorReadings[activeSensors][sensorMemory];
+    int smoothedReadings[activeSensors];
+
+    100 => int pollingRate;
 
     int ID;
 
@@ -15,13 +19,23 @@ public class Theia extends SensorBot{
         // if a message comes in to the bot, return the distances
         int distance;
         if (check >= 0) {
-            spork ~ oscrecv(check, address);
+            // spork ~ oscrecv(check, address);
+            spork ~ pollUltrasonics();
+        }
+    }
+
+    fun void pollUltrasonics() {
+        while(true) {
+            for (int i; i < activeSensors; i++){
+                //spork ~ getTheiaDistance(ID, i);
+                pollingRate::ms => now;
+            }
         }
     }
 
     fun void smoothReadings() {
-        for (int i; i < smoothReadings.size(); i++) {
-            smoothReadings[i] = pastSensorReadings[i][0];
+        for (0 => int i; i < activeSensors; i++){
+            pastSensorReadings[i][0] => smoothedReadings[i];
         }
     }
 
