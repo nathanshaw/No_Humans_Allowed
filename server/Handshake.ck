@@ -58,7 +58,9 @@ public class Handshake {
                 <<< "Unable to open serial device:", "\t", list[serial_port[i]] >>>;
             }
             else {
-                <<< list[serial_port[i]], "assigned to port", serial_port[i], "" >>>;
+                <<< list[serial_port[i]], 
+                    "assigned to port", 
+                    serial_port[i], "" >>>;
             }
         }
         <<< "-", "" >>>;

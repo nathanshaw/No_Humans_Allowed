@@ -1,4 +1,14 @@
 
+/*
+OscOut out;
+OscOut pOut;
+OscIn oin;
+OscMsg msg;
+("localhost", 50000) => out.dest;
+("localhost", 50010) => pOut.dest;
+50003 => oin.port;
+oin.listenAll();
+*/
 public class SensorListener { 
     // TODO, ALL OF THIS!!!!!!!
 

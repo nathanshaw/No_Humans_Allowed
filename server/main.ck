@@ -46,81 +46,70 @@ bots[2].setHomados(2);
 // if someone is really close the state is 2: agressive
 // if someone is sort of close the state is 1: quiet and timid
 // if someone if not detected, the state is 0: productive
-[0, 0, 0] @=> int botMood[];
+<<<"Created personality variables">>>;
+<<<"- - - - - - - - - - - - - - - - - ">>>;
 int arduinoIDs[talk.talk.returnNumRobotID()];
 for (0 => int i; i < talk.talk.returnNumRobotID(); i++) {
     talk.talk.returnRobotID(i) => arduinoIDs[i];
 }
+<<<"found ", arduinoIDs.cap(), " arduinos">>>;
 for (0 => int i; i < arduinoIDs.cap(); i++) {
+    <<<"looking at arduino ID : ", arduinoIDs[i]>>>;
     // figure out the bots
     for (bots.cap() => int botNum; botNum > 0; botNum--) {
-        if ((arduinoIDs[i] / 100) > botNum) {
-            <<<"BOARD BELONGS TO BOTNUM (index 0) : ", 
+        if ((arduinoIDs[i] / 100) == botNum) {
+            <<<"BOARD BELONGS TO BOTNUM    : ", 
                 botNum, " - ", arduinoIDs[i]>>>;
-        }
-    }
-}
-
-/*
-no-humans-allowed.ck
-
-This file provides the compositional logic for no-humans-allowed.ck
-
-OscOut out;
-OscOut pOut;
-OscIn oin;
-OscMsg msg;
-("localhost", 50000) => out.dest;
-("localhost", 50010) => pOut.dest;
-50003 => oin.port;
-oin.listenAll();
-
-
-
-fun void pollUltrasonics() {
-    while(true) {
-        for (int b; b < 3; b++) {
-            for (int i; i < 4; i++){
-                spork ~ getTheiaDistance(b, i);
-                100::ms => now;
-                //<<<"getting theia1 distance : ", i>>>;
+            for (9 => int board_type; board_type > 0; board_type--) {
+                if ((arduinoIDs[i] % 100) / 10 == board_type) {
+                    <<<"BOARD BELONGS TO BOARDTYPE : ", 
+                        board_type, " - ", arduinoIDs[i]>>>;
+                    for (9 => int board_num; board_num > -1; board_num--) {
+                        if ((arduinoIDs[i] % 10) == board_num) {
+                            <<<"BOARD is num               : ", 
+                                board_num, " - ", arduinoIDs[i]>>>;
+                        }
+                    }
+                }
             }
         }
     }
 }
+<<<"- - - - - - - - - - - - - - - - - ">>>;
+<<<"Initalizing Bots">>>;
+for (int i; i < bots.cap(); i++) {
+    spork ~ bots[i].init(i * 100);
+}
 
-spork ~ oscrecv();
-spork ~ pollUltrasonics();
+// create a shred that keeps track of the bots states
+<<<"- - - - - - - - - - - - - - - - - ">>>;
+<<<"Done with initializations">>>;
 
-// TODO make time variable that controls
-// the "velocity" of productive1()
-0.5::second => dur segment;
-now => time past_time;
-1200 => float speed;
-[now, now, now, now] @=> time next_trigger[];
-dur delay_time;
-now => time current_time;
-
-while(1) {
-    now => current_time;
-    for (int i; i < 4; i++) { 
-        if (bot1State[i] == 0 && current_time > next_trigger[i]){
-            spork ~ productive1(i, speed $ int); 
-            now + delay_time => next_trigger[i];
-            speed::ms => delay_time;
+fun void botListener() {
+    // poll bots for their states, applies logic to change the behavior
+    int botMoods[bots.cap()];
+    while(true) {
+        for (int i; i < bots.cap(); i++) {
+            if (bots[i].state != botMoods[i]) {
+                bots[i].state => botMoods[i];
+                <<<botMoods[0], botMoods[1], botMoods[2]>>>;
+            }
         }
-        else if (bot1State[i] == 2 && current_time > next_trigger[i]) {
-            spork ~ triggerAll(i, speed $ int);
-            now + delay_time => next_trigger[i];
-            speed::ms => delay_time;
+        for (int i; i < botMoods.cap(); i++) {
+            // if one of the bots is angry
+            if (botMoods[i] == 0) {
+                // set the other bots to quiet
+                for (int i; i < botMoods.cap(); i++) {
+                    1 => botMoods[i];
+                }
+                0 => botMoods[i];
+            }
         }
-        else if (bot1State[i] == 1 && current_time > next_trigger[i]){
-            now + delay_time => next_trigger[i]; 
-            speed::ms => delay_time;
-        }
-        else {
-            5::ms => now;
-        }
+        1::second => now;
     }
 }
-*/
+
+spork ~ botListener();
+while (true) {
+    1::second => now;
+}
