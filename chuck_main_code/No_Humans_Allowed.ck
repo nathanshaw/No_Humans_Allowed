@@ -365,29 +365,30 @@ while(times_fed < how_hungry) {
         5::ms => now;
     }
 }
+*/
 
 // test solinoids and leds
 while(1){
-for (60 => int i; i < 66; i++){
-    rotarySolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-for (60 => int i; i < 66; i++){
+    for (60 => int i; i < 66; i++){
+        <<<"Activating rotary solenoids : ", i>>>;
+        rotarySolinoids(i, 60, 30);
+        Math.random2(10,100)::ms => now;
+    }
+    for (60 => int i; i < 66; i++){
+            smallSolinoids(i, 60, 30);
+        Math.random2(10,100)::ms => now;
+    }
+    for (60 => int i; i < 66; i++){
+        largeSolinoids(i, 60, 30);
+        Math.random2(10,100)::ms => now;
+    }
+    for (60 => int i; i < 66; i++){
+        rotarySolinoids(i, 60, 30);
         smallSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
+        largeSolinoids(i, 60, 30);
+        Math.random2(10,100)::ms => now;
+    }
 }
-for (60 => int i; i < 66; i++){
-    largeSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-for (60 => int i; i < 66; i++){
-    rotarySolinoids(i, 60, 30);
-    smallSolinoids(i, 60, 30);
-    largeSolinoids(i, 60, 30);
-    Math.random2(10,100)::ms => now;
-}
-}
-*/
 1::day => now;
 // now either the composition can end or
 // there can be a pre-composed outro for it

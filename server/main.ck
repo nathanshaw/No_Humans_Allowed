@@ -13,7 +13,6 @@
     3.1 when a bot should enter into a state it is the listener that tells them
     to enter into that state.
 */
-
 // give it some time to breathe
 HandshakeID talk;
 0.5::second => now;
@@ -28,19 +27,8 @@ talk.talk.init();
 // bring on the bots
 Personality bots[3];
 
-// MainBot - Craig
-bots[0].setTheias(1);
-bots[0].setBrigids(6);
-
-// Secondary Bot
-bots[1].setTheias(1);
-bots[1].setBrigids(4);
-bots[1].setHomados(2);
-
-// Trinary Bot
-bots[2].setTheias(1);
-bots[2].setBrigids(4);
-bots[2].setHomados(2);
+int botIDs[3][7];
+int botFound[3];
 
 // for keeping track of the states of all the bots
 // if someone is really close the state is 2: agressive
@@ -53,17 +41,20 @@ for (0 => int i; i < talk.talk.returnNumRobotID(); i++) {
     talk.talk.returnRobotID(i) => arduinoIDs[i];
 }
 <<<"found ", arduinoIDs.cap(), " arduinos">>>;
+<<<"- - - - - - - - - - - - - - - - - ">>>;
 for (0 => int i; i < arduinoIDs.cap(); i++) {
     <<<"looking at arduino ID : ", arduinoIDs[i]>>>;
     // figure out the bots
     for (bots.cap() => int botNum; botNum > 0; botNum--) {
-        if ((arduinoIDs[i] / 100) == botNum) {
+        if ((arduinoIDs[i] / 100) -1 == botNum) {
             <<<"BOARD BELONGS TO BOTNUM    : ", 
-                botNum, " - ", arduinoIDs[i]>>>;
+                botNum>>>;
+            i => botIDs[botNum][botFound[botNum]];
+            botFound[botNum]++;
             for (9 => int board_type; board_type > 0; board_type--) {
                 if ((arduinoIDs[i] % 100) / 10 == board_type) {
                     <<<"BOARD BELONGS TO BOARDTYPE : ", 
-                        board_type, " - ", arduinoIDs[i]>>>;
+                        board_type>>>;
                     for (9 => int board_num; board_num > -1; board_num--) {
                         if ((arduinoIDs[i] % 10) == board_num) {
                             <<<"BOARD is num               : ", 
@@ -77,22 +68,22 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
 }
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Initalizing Bots">>>;
-for (int i; i < bots.cap(); i++) {
-    spork ~ bots[i].init(i * 100);
-}
-
+// spork ~ bots[0].init(1, "/bot1", botIDs[0]);
+// spork ~ bots[1].init(2, "/bot2", botIDs[1]);
+spork ~ bots[2].init(3, "/bot3", botIDs[2]);
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Done with initializations">>>;
 
 fun void botListener() {
     // poll bots for their states, applies logic to change the behavior
+    <<<"Bot listener started">>>;
     int botMoods[bots.cap()];
     while(true) {
         for (int i; i < bots.cap(); i++) {
             if (bots[i].state != botMoods[i]) {
                 bots[i].state => botMoods[i];
-                <<<botMoods[0], botMoods[1], botMoods[2]>>>;
+                <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
             }
         }
         for (int i; i < botMoods.cap(); i++) {

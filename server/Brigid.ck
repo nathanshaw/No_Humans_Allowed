@@ -14,7 +14,7 @@ public class Brigid extends SerialBot {
 
     fun void setID(int id, string idString) {
         id => int ID;
-        "/brigid/" + idString => string address;
+        "/brigid" + idString => string address;
         <<<"Brigid created with address of : ", address>>>;
         IDCheck(ID, address) => int check;
         if (check >= 0) {
