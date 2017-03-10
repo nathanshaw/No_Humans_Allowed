@@ -82,12 +82,13 @@ public class Handshake {
             serial[i].getByte() => int arduinoID;
             (botID*100) + (botType*10) + (arduinoID) => robotID[i];
             <<<"ROBOT ID : ", robotID[i]>>>;
+            100::ms => now;
             <<<"- - - - - - - - - - - - - - -">>>;
         }
     }
     // bitwise operations, allows note numbers 0-63 and note velocities 0-1023
     fun void note(int ID, int num, int vel) {
-        // <<<"sending note : ", ID, " - ", num, " - ", vel>>>;
+        <<<"sending note : ", ID, " - ", num, " - ", vel>>>;
         int bytes[3];
         0xff => bytes[0];
         (num << 2) | (vel >> 8) => bytes[1]; 

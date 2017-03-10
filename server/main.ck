@@ -25,10 +25,12 @@ talk.talk.init();
 <<<"----------------">>>;
 
 // bring on the bots
-Personality bots[3];
+Personality bots[6];
 
 int botIDs[3][7];
-int botFound[3];
+int brigidBotsFound[3];
+int homadosBotsFound[3];
+int theiaBotsFound[3];
 
 // for keeping track of the states of all the bots
 // if someone is really close the state is 2: agressive
@@ -43,14 +45,13 @@ for (0 => int i; i < talk.talk.returnNumRobotID(); i++) {
 <<<"found ", arduinoIDs.cap(), " arduinos">>>;
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 for (0 => int i; i < arduinoIDs.cap(); i++) {
+    <<<"----------------------------">>>;
     <<<"looking at arduino ID : ", arduinoIDs[i]>>>;
     // figure out the bots
     for (bots.cap() => int botNum; botNum > 0; botNum--) {
         if ((arduinoIDs[i] / 100) -1 == botNum) {
             <<<"BOARD BELONGS TO BOTNUM    : ", 
                 botNum>>>;
-            i => botIDs[botNum][botFound[botNum]];
-            botFound[botNum]++;
             for (9 => int board_type; board_type > 0; board_type--) {
                 if ((arduinoIDs[i] % 100) / 10 == board_type) {
                     <<<"BOARD BELONGS TO BOARDTYPE : ", 
@@ -59,6 +60,28 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
                         if ((arduinoIDs[i] % 10) == board_num) {
                             <<<"BOARD is num               : ", 
                                 board_num, " - ", arduinoIDs[i]>>>;
+                            // brigid
+                            if (board_type == 1){
+                                // if we have not grabbed a brigid yet
+                                <<<"assigned : ", i, " to botIDs ", board_num-1 >>>;
+                                i => botIDs[botNum][board_num-1];
+                                brigidBotsFound[botNum]++;
+                            }
+                            // homados
+                            else if (board_type == 2){
+                                // if we have not grabbed a homados yet
+                                if (homadosBotsFound[botNum] == 0){
+                                    i => botIDs[botNum][4];
+                                }
+                                else if (homadosBotsFound[botNum] == 1){
+                                    i => botIDs[botNum][5];
+                                }
+                                homadosBotsFound[botNum]++;
+                            }
+                            // theia
+                            else if (board_type == 4){
+                                i => botIDs[botNum][6];
+                            }
                         }
                     }
                 }
@@ -68,8 +91,8 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
 }
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Initalizing Bots">>>;
-// spork ~ bots[0].init(1, "/bot1", botIDs[0]);
-// spork ~ bots[1].init(2, "/bot2", botIDs[1]);
+//spork ~ bots[0].init(1, "/bot1", botIDs[0]);
+//spork ~ bots[1].init(2, "/bot2", botIDs[1]);
 spork ~ bots[2].init(3, "/bot3", botIDs[2]);
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
@@ -86,6 +109,7 @@ fun void botListener() {
                 <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
             }
         }
+        /*
         for (int i; i < botMoods.cap(); i++) {
             // if one of the bots is angry
             if (botMoods[i] == 0) {
@@ -96,6 +120,7 @@ fun void botListener() {
                 0 => botMoods[i];
             }
         }
+        */
         1::second => now;
     }
 }
