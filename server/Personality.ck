@@ -4,7 +4,9 @@ public class Personality{
     
     OscIn oin;
     OscMsg msg;
-    int myPorts[];
+    int brigidPorts[];
+    int homadosPorts[];
+    int theiaPorts[];
     
     // new port number
     50002 => oin.port;
@@ -14,120 +16,116 @@ public class Personality{
     int botNum;
     int state;
     string address;
-
-    fun void init(int aBotNum, string addr, int ports[]){
+    
+    fun void init(int aBotNum, string addr, 
+    int bPorts[]. int hPorts[],
+    int tPorts[]){
+        bPorts => brigidPorts;
+        tPorts => theiaPorts;
+        hPorts => homadosPorts;
         aBotNum => botNum;
         addr => address;
         while(true) {
-            if (state == 1) {
-                if (ports.cap() > 0){
-                    angryStateOne(ports);
-                    // 0 => state;
-                }
+            if (state == 2) {
+                // resting state
+                2::second => now;
             }
-            if (state == 0) {
+            else if (state == 1) {
+                angryStateOne(brigidPorts, homadosPorts);
+            }
+            else if (state == 0) {
                 if (ports.cap() > 0){
-                    Math.random2(0,3) => int chance;
-                    50 => int mint;
-                    200 => int maxt;
-                    609 => int minv;
-                    900 => int maxv;
-                    if (chance <  2){
-                        productiveStateOne(ports, Math.random2(mint, maxt),
+                    // 80% of the time its normal
+                    Math.random2(1,10) => int chance;
+                    5 => int mint;
+                    20 => int maxt;
+                    60 => int minv;
+                    300 => int maxv;
+                    if (chance <  9){
+                        productiveStateOne(brigidPorts, homadosPorts, Math.random2(mint, maxt),
                         Math.random2(minv, maxv));
                     }
-                    else if (chance == 2){
-                        productiveStateTwo(ports, Math.random2(mint, maxt),
+                    else if (chance == 9){
+                        productiveStateTwo(brigidPorts, homadosPorts, Math.random2(mint, maxt),
                         Math.random2(minv, maxv));
                     }
-                    else if (chance == 3){
-                        productiveStateThree(ports, Math.random2(mint, maxt),
+                    else if (chance == 10){
+                        productiveStateThree(brigidPorts, homadosPorts, Math.random2(mint, maxt),
                         Math.random2(minv, maxv));
                     }
                 }
             }
         }
     }
-
-    fun void productiveStateOne(int ports[], int wait, int vel) {
-         <<<wait, " - ", vel, " - Trigger ProductiveStateOne on bot : ", botNum, " ", ports[0], ports[1], ports[2],
-        ports[3], ports[4], ports[5], ports[6]>>>;
+    
+    fun void productiveStateOne(int bPorts[], int hPorts, int wait, int vel) {
+        <<<wait, " - ", vel, " - Trigger ProductiveStateOne on bot : ", botNum>>>;
         for (int i; i < 48; i++){
-            // front led strip
-            // should be front small solenoids
-            talk.talk.note(ports[0], i%6, vel);
-            talk.talk.note(ports[1], i%6, vel);
-            talk.talk.note(ports[2], i%6, (vel*0.8) $ int);
-            talk.talk.note(ports[3], i%6, vel);
-            talk.talk.note(ports[4], i%16, (vel*0.8) $ int);
-            talk.talk.note(ports[5], i%16, vel);
+            for (int b; b < bPorts.size(); b++){
+                talk.talk.note(ports[b], i%6, vel + Math.random2(1,5));
+            }
+            for (int h; h < hPorts.size(); h++){
+                talk.talk.note(ports[h], i%16, vel + Math.random2(1,5));
+            }
             wait::ms => now;
         }
     }
     
-
-    fun void productiveStateTwo(int ports[], int wait, int vel) {
-         <<<wait, " - ", vel, " - Trigger ProductiveStateTwo on bot : ", botNum, " ", ports[0], ports[1], ports[2],
-        ports[3], ports[4], ports[5], ports[6]>>>;
+    
+    fun void productiveStateTwo(int bPorts[], int hPorts, int wait, int vel) {
+        <<<wait, " - ", vel, " - Trigger ProductiveStateTwo on bot : ", botNum>>>;
         for (int i; i < 48; i++){
-            // front led strip
-            // should be front small solenoids
-            talk.talk.note(ports[0], i%6, vel);
-            talk.talk.note(ports[1], i%6, vel);
-            talk.talk.note(ports[2], i%6, (vel*0.8) $ int);
-            talk.talk.note(ports[3], i%6, vel);
-            talk.talk.note(ports[4], i%16, (vel*0.8) $ int);
-            talk.talk.note(ports[5], i%16, vel);
-            if (i%2 == 1){
+            for (int b; b < bPorts.size(); b++){
+                talk.talk.note(ports[b], i%6, vel + Math.random2(1,5));
+            }
+            for (int h; h < hPorts.size(); h++){
+                talk.talk.note(ports[h], i%16, vel + Math.random2(1,5));
+            }
+            // 1/3 of the time it waits twice as long
+            if (i%3 == 2){
                 wait::ms => now;
             }
             wait::ms => now;
         }
     }
-
-    fun void productiveStateThree(int ports[], int wait, int vel) {
-         <<<wait, " - ", vel, " - Trigger ProductiveStateThree on bot : ", botNum, " ", ports[0], ports[1], ports[2],
-        ports[3], ports[4], ports[5], ports[6]>>>;
+    
+    fun void productiveStateThree(int bPorts[], int hPorts, int wait, int vel) {
+        <<<wait, " - ", vel, " - Trigger ProductiveStateThree on bot : ", botNum>>>;
         for (int i; i < 48; i++){
-            // front led strip
-            // should be front small solenoids
-            talk.talk.note(ports[0], i%6, vel);
-            talk.talk.note(ports[1], i%6, vel);
-            talk.talk.note(ports[2], i%6, (vel*0.8) $ int);
-            talk.talk.note(ports[3], i%6, vel);
-            talk.talk.note(ports[4], i%16, (vel*0.8) $ int);
-            talk.talk.note(ports[5], i%16, vel);
+            for (int b; b < bPorts.size(); b++){
+                talk.talk.note(ports[b], i%6, vel);
+            }
+            for (int h; h < hPorts.size(); h++){
+                talk.talk.note(ports[h], i%16, vel);
+            }
+            // little funky
             if (i%5 < 3){
-                (wait/2)::ms => now;
+                wait*0.5::ms => now;
             }
             else{
-                (wait*2)::ms => now;
+                wait::ms => now;
             }
         }
     }
-    fun void angryStateOne(int ports[]) {
-         <<<"Trigger StateOne on bot : ", botNum, " ", ports[0], ports[1], ports[2],
-        ports[3], ports[4], ports[5], ports[6]>>>;
-        for (int i; i < 48; i++){
-            // front led strip
-            // should be front small solenoids
-            talk.talk.note(ports[0], i%6, 100);
-            //
-            // should be front leds
-            // talk.talk.note(ports[1], i%6, 100);
-            // front led strip?
-            // talk.talk.note(ports[2], i%6, 100);
-            // front led strip? and fron solenoids
-            // talk.talk.note(ports[3], i%6, 100);
-            // front led strip?
-            // talk.talk.note(ports[4], i%6, 100);
-            // large back solenoids
-            // talk.talk.note(ports[5], i%6, 100);
-            // large back solenoids
-            //talk.talk.note(ports[6], i%6, 100);
-            100::ms => now;
+    
+    fun void angryStateOne(int bPorts[], int hPorts, int minWait, int maxWait) {
+        <<<"Trigger angryStateOne on bot : ", botNum>>>;
+        // turn on all solinoids at a random interval 16 times
+        for (int z; z < 16; z++){
+            for (int i; i < 6; i++){
+                for (int p; p < bPorts.size(); p++){
+                    talk.talk.note(bPorts[p], i%6, 200 + Math.random2(0, 100));
+                }  
+            }
+            for (int i; i < 6; i++){
+                for (int p; p < bPorts.size(); p++){
+                    talk.talk.note(hPorts[p], i%16, 200 + Math.random2(0, 100));
+                }  
+            }
+            // wait a random amount of time, before repeating
+            Math.random2(minWait, maxWait)::ms => now;
         }
-    }
+    } 
     
     // tells child class to only send serial messages
     // if it has successfully connected to a matching robot
@@ -147,8 +145,8 @@ public class Personality{
     
     // receives OSC and sends out serial
     fun void oscrecv(int port, string address) {
-            <<<"-- Creating osc receiver at port : ", port, " and address : ", address>>>;
-            while(true) {
+        <<<"-- Creating osc receiver at port : ", port, " and address : ", address>>>;
+        while(true) {
             oin => now;
             while (oin.recv(msg)) {
                 if (msg.address == address) {
@@ -168,5 +166,5 @@ public class Personality{
                 }
             }
         }
-        }
+    }
 }

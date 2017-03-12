@@ -25,12 +25,16 @@ talk.talk.init();
 <<<"----------------">>>;
 
 // bring on the bots
-Personality bots[6];
-
-int botIDs[3][7];
-int brigidBotsFound[3];
-int homadosBotsFound[3];
-int theiaBotsFound[3];
+Personality bots[3];
+// shield specific bot ID's
+int brigidBotIDs[3][7];
+int homadosBotIDs[3][7];
+int theiaBotIDs[3][7];
+// for keeping track of how many shields of each
+// type are found in each of the personalities
+int brigidBotNum[3];
+int homadosBotNum[3];
+int theiaBotNum[3];
 
 // for keeping track of the states of all the bots
 // if someone is really close the state is 2: agressive
@@ -50,37 +54,29 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
     // figure out the bots
     for (bots.cap() => int botNum; botNum > 0; botNum--) {
         if ((arduinoIDs[i] / 100) -1 == botNum) {
-            <<<"BOARD BELONGS TO BOTNUM    : ", 
-                botNum>>>;
             for (9 => int board_type; board_type > 0; board_type--) {
                 if ((arduinoIDs[i] % 100) / 10 == board_type) {
-                    <<<"BOARD BELONGS TO BOARDTYPE : ", 
-                        board_type>>>;
                     for (9 => int board_num; board_num > -1; board_num--) {
                         if ((arduinoIDs[i] % 10) == board_num) {
                             <<<"BOARD is num               : ", 
                                 board_num, " - ", arduinoIDs[i]>>>;
                             // brigid
                             if (board_type == 1){
-                                // if we have not grabbed a brigid yet
-                                <<<"assigned : ", i, " to botIDs ", board_num-1 >>>;
-                                i => botIDs[botNum][board_num-1];
-                                brigidBotsFound[botNum]++;
+                                <<<"Brigid assigned : ", i, " to bot : ", botNum>>>;
+                                i => brigidBotsIDs[botNum][brigidBotNum[botNum]];
+                                brigidBotNum[botNum]++;
                             }
                             // homados
                             else if (board_type == 2){
-                                // if we have not grabbed a homados yet
-                                if (homadosBotsFound[botNum] == 0){
-                                    i => botIDs[botNum][4];
-                                }
-                                else if (homadosBotsFound[botNum] == 1){
-                                    i => botIDs[botNum][5];
-                                }
-                                homadosBotsFound[botNum]++;
+                                <<<"Homados assigned : ", i, " to bot : ", botNum>>>;
+                                i => homadosBotID[botNum][homadosBotNum[botNum]];
+                                homadosBotNum[botNum]++;
                             }
                             // theia
                             else if (board_type == 4){
-                                i => botIDs[botNum][6];
+                                <<<"Theia assigned : ", i, " to bot : ", botNum>>>;
+                                i => theiaBotIDs[botNum][theiaBotNum[botID]];
+                                theiaBotNum[botID]++;
                             }
                         }
                     }
@@ -89,15 +85,16 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
         }
     }
 }
+
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Initalizing Bots">>>;
-//spork ~ bots[0].init(1, "/bot1", botIDs[0]);
-//spork ~ bots[1].init(2, "/bot2", botIDs[1]);
-spork ~ bots[2].init(3, "/bot3", botIDs[2]);
+spork ~ bots[0].init(1, "/bot1", brigidBotIDs[0], homadosBotIDs[0], theiaBotIDs[0]);
+spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[1]);
+spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2]);
+
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Done with initializations">>>;
-
 fun void botListener() {
     // poll bots for their states, applies logic to change the behavior
     <<<"Bot listener started">>>;
@@ -121,7 +118,7 @@ fun void botListener() {
             }
         }
         */
-        1::second => now;
+        5::second => now;
     }
 }
 
