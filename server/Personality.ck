@@ -4,9 +4,9 @@ public class Personality{
     
     OscIn oin;
     OscMsg msg;
-    int brigidPorts[];
-    int homadosPorts[];
-    int theiaPorts[];
+    int brigidPorts[0];
+    int homadosPorts[0];
+    int theiaPorts[0];
     
     // new port number
     50002 => oin.port;
@@ -18,29 +18,54 @@ public class Personality{
     string address;
     
     fun void init(int aBotNum, string addr, 
-    int bPorts[]. int hPorts[],
+    int bPorts[], int hPorts[],
     int tPorts[]){
-        bPorts => brigidPorts;
-        tPorts => theiaPorts;
-        hPorts => homadosPorts;
+        // dynamically set up the bot
+        <<<"port sizes : ", bPorts.size(), "-", hPorts.size(), "-", tPorts.size()>>>;
+        
+        for (int i; i < bPorts.size(); i++){
+            <<<"port contents : ", bPorts[i]>>>;//, "-", hPorts[i], "-", tPorts[i]>>>;
+            if (bPorts[i] >= 0){
+                brigidPorts << bPorts[i];
+            }
+        }
+        for (int i; i < hPorts.size(); i++){
+            <<<"hport contents : ", hPorts[i]>>>;
+            if (hPorts[i] >= 0){
+                homadosPorts << hPorts[i];
+            }
+        }
+        for (int i; i < tPorts.size(); i++){
+            <<<"tPort contents : ", tPorts[i]>>>;
+            if (tPorts[i] >= 0){
+                theiaPorts << tPorts[i];
+            }
+        }
         aBotNum => botNum;
         addr => address;
         while(true) {
-            if (state == 2) {
+            <<<"bot ", botNum, " state ", state>>>;
+            if (state == 1) {
                 // resting state
                 2::second => now;
             }
-            else if (state == 1) {
-                angryStateOne(brigidPorts, homadosPorts);
+            else if (state == 2) {
+                //  bports, hports, minWait, maxWait
+                if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
+                    angryStateOne(brigidPorts, homadosPorts, 50, 2750);
+                }
+                else{
+                    2::second => now;   
+                }
             }
             else if (state == 0) {
-                if (ports.cap() > 0){
+                if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
                     // 80% of the time its normal
                     Math.random2(1,10) => int chance;
-                    5 => int mint;
-                    20 => int maxt;
-                    60 => int minv;
-                    300 => int maxv;
+                    200 => int mint;
+                    200 => int maxt;
+                    12 => int minv;
+                    17 => int maxv;
                     if (chance <  9){
                         productiveStateOne(brigidPorts, homadosPorts, Math.random2(mint, maxt),
                         Math.random2(minv, maxv));
@@ -54,32 +79,34 @@ public class Personality{
                         Math.random2(minv, maxv));
                     }
                 }
+                else{
+                    2::second => now;
+                }
             }
         }
     }
-    
-    fun void productiveStateOne(int bPorts[], int hPorts, int wait, int vel) {
+    fun void productiveStateOne(int bPorts[], int hPorts[], int wait, int vel) {
         <<<wait, " - ", vel, " - Trigger ProductiveStateOne on bot : ", botNum>>>;
         for (int i; i < 48; i++){
             for (int b; b < bPorts.size(); b++){
-                talk.talk.note(ports[b], i%6, vel + Math.random2(1,5));
+                talk.talk.note(bPorts[b], i%6, vel + Math.random2(1,5));
             }
             for (int h; h < hPorts.size(); h++){
-                talk.talk.note(ports[h], i%16, vel + Math.random2(1,5));
+                talk.talk.note(hPorts[h], i%16, vel*2 + Math.random2(1,5));
             }
             wait::ms => now;
         }
     }
     
     
-    fun void productiveStateTwo(int bPorts[], int hPorts, int wait, int vel) {
+    fun void productiveStateTwo(int bPorts[], int hPorts[], int wait, int vel) {
         <<<wait, " - ", vel, " - Trigger ProductiveStateTwo on bot : ", botNum>>>;
-        for (int i; i < 48; i++){
+        for (int i; i < 384; i++){
             for (int b; b < bPorts.size(); b++){
-                talk.talk.note(ports[b], i%6, vel + Math.random2(1,5));
+                talk.talk.note(bPorts[b], i%6, vel + Math.random2(1,5));
             }
             for (int h; h < hPorts.size(); h++){
-                talk.talk.note(ports[h], i%16, vel + Math.random2(1,5));
+                talk.talk.note(hPorts[h], i%16, vel*2 + Math.random2(1,5));
             }
             // 1/3 of the time it waits twice as long
             if (i%3 == 2){
@@ -89,18 +116,18 @@ public class Personality{
         }
     }
     
-    fun void productiveStateThree(int bPorts[], int hPorts, int wait, int vel) {
+    fun void productiveStateThree(int bPorts[], int hPorts[], int wait, int vel) {
         <<<wait, " - ", vel, " - Trigger ProductiveStateThree on bot : ", botNum>>>;
-        for (int i; i < 48; i++){
+        for (int i; i < 384; i++){
             for (int b; b < bPorts.size(); b++){
-                talk.talk.note(ports[b], i%6, vel);
+                talk.talk.note(bPorts[b], i%6, vel);
             }
             for (int h; h < hPorts.size(); h++){
-                talk.talk.note(ports[h], i%16, vel);
+                talk.talk.note(hPorts[h], i%16, vel*2);
             }
             // little funky
             if (i%5 < 3){
-                wait*0.5::ms => now;
+                wait::ms => now;
             }
             else{
                 wait::ms => now;
@@ -108,18 +135,20 @@ public class Personality{
         }
     }
     
-    fun void angryStateOne(int bPorts[], int hPorts, int minWait, int maxWait) {
+    fun void angryStateOne(int bPorts[], int hPorts[], int minWait, int maxWait) {
         <<<"Trigger angryStateOne on bot : ", botNum>>>;
         // turn on all solinoids at a random interval 16 times
         for (int z; z < 16; z++){
+            // for brigid
             for (int i; i < 6; i++){
                 for (int p; p < bPorts.size(); p++){
-                    talk.talk.note(bPorts[p], i%6, 200 + Math.random2(0, 100));
+                    talk.talk.note(bPorts[p], i%6, 30 + Math.random2(0, 100));
                 }  
             }
-            for (int i; i < 6; i++){
-                for (int p; p < bPorts.size(); p++){
-                    talk.talk.note(hPorts[p], i%16, 200 + Math.random2(0, 100));
+            // for homados
+            for (int i; i < 16; i++){
+                for (int p; p < hPorts.size(); p++){
+                    talk.talk.note(hPorts[p], i%16, 30 + Math.random2(0, 100));
                 }  
             }
             // wait a random amount of time, before repeating
