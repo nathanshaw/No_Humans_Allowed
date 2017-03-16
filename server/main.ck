@@ -122,7 +122,7 @@ fun void botListener() {
             if (botMoods[i] == 2) {
                 // set the other bots to quiet
                 for (int t; t < botMoods.cap(); t++) {
-                    if ( t != i) {
+                    if ( t != i && botMoods[i] == 0) {
                         1 => botMoods[i];
                     }
                 }
