@@ -1,12 +1,16 @@
 public class Personality{
     
     HandshakeID talk;
+    SerialIO serial;
     
     OscIn oin;
     OscMsg msg;
     int brigidPorts[0];
     int homadosPorts[0];
     int theiaPorts[0];
+    
+    // ultrasonic rangefinders distances
+    int distances[4];
     
     // new port number
     50002 => oin.port;
@@ -18,33 +22,34 @@ public class Personality{
     string address;
     
     fun void init(int aBotNum, string addr, 
-    int bPorts[], int hPorts[],
-    int tPorts[]){
+                  int bPorts[], int hPorts[],
+                  int tPorts[]){
         // dynamically set up the bot
-        <<<"port sizes : ", bPorts.size(), "-", hPorts.size(), "-", tPorts.size()>>>;
+        <<<"Initializing personality", botNum>>>;
         
         for (int i; i < bPorts.size(); i++){
-            <<<"port contents : ", bPorts[i]>>>;//, "-", hPorts[i], "-", tPorts[i]>>>;
+            // <<<"port contents : ", bPorts[i]>>>;//, "-", hPorts[i], "-", tPorts[i]>>>;
             if (bPorts[i] >= 0){
                 brigidPorts << bPorts[i];
             }
         }
         for (int i; i < hPorts.size(); i++){
-            <<<"hport contents : ", hPorts[i]>>>;
+            // <<<"hport contents : ", hPorts[i]>>>;
             if (hPorts[i] >= 0){
                 homadosPorts << hPorts[i];
             }
         }
         for (int i; i < tPorts.size(); i++){
-            <<<"tPort contents : ", tPorts[i]>>>;
+            // <<<"tPort contents : ", tPorts[i]>>>;
             if (tPorts[i] >= 0){
                 theiaPorts << tPorts[i];
+                spork ~ theiaListener();
             }
         }
         aBotNum => botNum;
         addr => address;
         while(true) {
-            <<<"bot ", botNum, " state ", state>>>;
+            // <<<"bot ", botNum, " state ", state>>>;
             if (state == 1) {
                 // resting state
                 2::second => now;
@@ -155,8 +160,46 @@ public class Personality{
             Math.random2(minWait, maxWait)::ms => now;
         }
     } 
+    // theia listener
+    fun void theiaListener(){
+        <<<"Starting theia listener from personality">>>;
+        <<<"Theia ports : ", theiaPorts[0]>>>;
+        /*
+        if(!serial.open(theiaPorts[0], SerialIO.B57600, SerialIO.BINARY)){
+            <<<"unable to open theia serial device : ", theiaPorts[0]>>>;
+            // does it need to do the the 'handshake' again?
+        }
+        */
+        while(true){
+            100::ms => now;
+            talk.talk.getTheiaDistance(botNum) @=> distances;
+            determineState();
+        }
+    }
+
+    fun void determineState() {
+        // if distance 0 is less than 30 enter into mad, 
+        // if distance less than 150 enter into silent
+        // else stay productive
+        if (distances[0] < 40){
+            if (state != 2) {
+                2 => state;
+                <<<"determineState changed state to : ", state>>>;
+            }
+        } else if (distances[0] < 150){
+            if (state != 1) {
+                1 => state;
+                <<<"determineState changed state to : ", state>>>;
+            }
+        } else{
+            if (state != 0) {
+                0 => state;
+                <<<"determineState changed state to : ", state>>>;
+            }
+        }
+    }
     
-    // tells child class to only send serial messages
+    // tells child class to only send theiaPorts gc messages
     // if it has successfully connected to a matching robot
     fun int IDCheck(int arduinoID, string address) {
         -1 => int check;
@@ -170,30 +213,5 @@ public class Personality{
             <<< address, "was unable to connect">>>;
         }
         return check;
-    }
-    
-    // receives OSC and sends out serial
-    fun void oscrecv(int port, string address) {
-        <<<"-- Creating osc receiver at port : ", port, " and address : ", address>>>;
-        while(true) {
-            oin => now;
-            while (oin.recv(msg)) {
-                if (msg.address == address) {
-                    <<<"Incomming message : ", msg.address, msg.getInt(0), msg.getInt(1)>>>;
-                    // renote(msg.getInt(0)) => int note;
-                    //<<<"requesting sensor data : ", address, " ", 
-                    //    note, " ", msg.getInt(1)>>>;
-                    // int data;
-                    // if (note >= 0) {
-                    // talk.talk.getTheiaState(port, note, 
-                    //                        msg.getInt(1), address) => data;
-                    // <<<"Asking theia for state">>>;
-                    // }
-                    //else {
-                    //    <<< msg.getInt(0), "is not an accepted note number for", address, "" >>>;
-                    //}
-                }
-            }
-        }
     }
 }

@@ -37,7 +37,7 @@ for (int i; i < 3; i++){
         -1 => brigidBotIDs[i][ii];
         -1 => homadosBotIDs[i][ii];
         -1 => theiaBotIDs[i][ii];
-    }   
+    }
 }
 // for keeping track of how many shields of each
 // type are found in each of the personalities
@@ -98,10 +98,12 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Initalizing Bots">>>;
 spork ~ bots[0].init(1, "/bot1", brigidBotIDs[0], homadosBotIDs[0], theiaBotIDs[0]);
-4::second => now;
+/*
+2::second => now;
 spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[1]);
-4::second => now;
+3::second => now;
 spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2]);
+*/
 
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
@@ -122,21 +124,14 @@ fun void botListener() {
             if (botMoods[i] == 2) {
                 // set the other bots to quiet
                 for (int t; t < botMoods.cap(); t++) {
-                    if ( t != i && botMoods[i] == 0) {
-                        1 => botMoods[i];
+                    if ( t != i && botMoods[t] == 0) {
+                        1 => botMoods[t];
+                        <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
                     }
                 }
             }
         }
         5::second => now;
-        if (Math.random2(0,10) == 7) {
-            if (botMoods[0] != 2){
-                2 => botMoods[0];   
-            }
-            else{
-                0 => botMoods[0];   
-            }
-        }
     }
 }
 

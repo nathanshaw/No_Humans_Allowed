@@ -1,14 +1,3 @@
-
-/*
-OscOut out;
-OscOut pOut;
-OscIn oin;
-OscMsg msg;
-("localhost", 50000) => out.dest;
-("localhost", 50010) => pOut.dest;
-50003 => oin.port;
-oin.listenAll();
-*/
 public class SensorListener { 
     // TODO, ALL OF THIS!!!!!!!
 
@@ -58,7 +47,7 @@ public class SensorListener {
                 <<< "Unable to open serial device:", "\t", list[serial_port[i]] >>>;
             }
             else {
-                <<< list[serial_port[i]], "assigned to port", serial_port[i], "" >>>;
+                // <<< list[serial_port[i]], "assigned to port", serial_port[i], "" >>>;
             }
         }
         <<< "-", "" >>>;
@@ -78,9 +67,9 @@ public class SensorListener {
             serial[i].onByte() => now;
             serial[i].getByte() => int arduinoID;
             <<<"Port ", i, "has arduino id : ", arduinoID>>>;
-            <<<"bot type : ", botType, " botID : ", botID>>>;
+            //<<<"bot type : ", botType, " botID : ", botID>>>;
             (botID*100) + (botType*10) + (arduinoID) => robotID[i];
-            <<<"ROBOT ID : ", robotID[i]>>>;
+            //<<<"ROBOT ID : ", robotID[i]>>>;
         }
     }
     // bitwise operations, allows note numbers 0-63 and note velocities 0-1023

@@ -8,11 +8,11 @@ public class Theia extends SensorBot{
     int pastSensorReadings[activeSensors][sensorMemory];
     int smoothedReadings[activeSensors];
 
-    100 => int pollingRate;
-
     int ID;
 
+    <<<"Theia initialized with ID of :", ID>>>;
     fun void setID(int id, string stringID) {
+        <<<"Set ID called for Theia : ", ID>>>;
         id => ID;
         "/theia/" + stringID => string address;
         IDCheck(ID, address) => int check;
@@ -20,16 +20,10 @@ public class Theia extends SensorBot{
         int distance;
         if (check >= 0) {
             // spork ~ oscrecv(check, address);
-            spork ~ pollUltrasonics();
+            spork ~ ultrasonicListener();
         }
-    }
-
-    fun void pollUltrasonics() {
-        while(true) {
-            for (int i; i < activeSensors; i++){
-                //spork ~ getTheiaDistance(ID, i);
-                pollingRate::ms => now;
-            }
+        else{
+            <<<"Theia check failed...">>>;
         }
     }
 
@@ -42,6 +36,14 @@ public class Theia extends SensorBot{
     fun void newReading(int sensorNum, int reading) {
         for (int i; i < pastSensorReadings[sensorNum].size(); i++){
             <<<"DUMMY CODE?">>>;
+        }
+    }
+
+    fun void ultrasonicListener(){
+        <<<"Starting Ultrasonic listener">>>;
+        while(true){
+            1000::ms => now;
+            <<<"Listening baaaby!">>>;
         }
     }
 }
