@@ -97,13 +97,13 @@ public class Handshake {
 
     fun int[] getTheiaDistance(int bot_id){
         [0xFF, 0x0A, 0x00] @=> int bytes[];
-        bot_id - 1 => int id;
+        bot_id => int id;
         serial[id].writeBytes(bytes);
-        <<<"writting bytes to serial : ", id>>>;
+        // <<<"writting bytes to serial : ", id>>>;
         serial[id].onByte() => now;
         int distances[4];
         if (serial[id].getByte() == 0xFF){
-            <<<"received a 0xFF">>>;
+            // <<<"received a 0xFF">>>;
             serial[id].onByte() => now;
             serial[id].getByte() => distances[0];
             serial[id].onByte() => now;
@@ -112,8 +112,8 @@ public class Handshake {
             serial[id].getByte() => distances[2];
             serial[id].onByte() => now;
             serial[id].getByte() => distances[3];
-             <<<id, "- Dist: ", distances[0], 
-                distances[1], distances[2], distances[3]>>>;
+             // <<<id, "- Dist: ", distances[0], 
+             //   distances[1], distances[2], distances[3]>>>;
         }
         else{
             <<<"FLUSHED BYTE : ", id>>>;

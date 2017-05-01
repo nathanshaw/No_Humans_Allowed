@@ -1,7 +1,6 @@
 public class Personality{
     
     HandshakeID talk;
-    SerialIO serial;
     
     OscIn oin;
     OscMsg msg;
@@ -160,19 +159,14 @@ public class Personality{
             Math.random2(minWait, maxWait)::ms => now;
         }
     } 
+
     // theia listener
     fun void theiaListener(){
+        5::second => now;
         <<<"Starting theia listener from personality">>>;
-        <<<"Theia ports : ", theiaPorts[0]>>>;
-        /*
-        if(!serial.open(theiaPorts[0], SerialIO.B57600, SerialIO.BINARY)){
-            <<<"unable to open theia serial device : ", theiaPorts[0]>>>;
-            // does it need to do the the 'handshake' again?
-        }
-        */
         while(true){
             100::ms => now;
-            talk.talk.getTheiaDistance(botNum) @=> distances;
+            talk.talk.getTheiaDistance(theiaPorts[0]) @=> distances;
             determineState();
         }
     }
