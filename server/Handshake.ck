@@ -87,10 +87,11 @@ public class Handshake {
             // <<<"bot type : ", botType>>>;
             serial[i].onByte() => now;
             serial[i].getByte() => int arduinoID;
+
             // <<<"arduino ID :", arduinoID>>>;
             (botID*100) + (botType*10) + (arduinoID) => robotID[i];
             <<<"ROBOT ID : ", robotID[i]>>>;
-            100::ms => now;
+            40::ms => now;
             <<<"- - - - - - - - - - - - - - -">>>;
         }
     }

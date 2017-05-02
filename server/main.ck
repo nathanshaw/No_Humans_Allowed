@@ -29,6 +29,8 @@ Personality bots[3];
 // shield specific bot ID's
 int brigidBotIDs[3][7];
 int homadosBotIDs[3][7];
+int brigidLightIDs[3][7];
+int homadosLightIDs[3][7];
 int theiaBotIDs[3][7];
 
 // set defaults to -1
@@ -44,6 +46,8 @@ for (int i; i < 3; i++){
 int brigidBotNum[3];
 int homadosBotNum[3];
 int theiaBotNum[3];
+int brigidLightNum[3];
+int homadosLightNum[3];
 
 // for keeping track of the states of all the bots
 // if someone is really close the state is 2: agressive
@@ -71,15 +75,29 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
                             board_num, " - ", arduinoIDs[i]>>>;
                             // brigid
                             if (board_type == 1){
-                                <<<"Brigid assigned : ", i, " to bot : ", botNum>>>;
-                                i => brigidBotIDs[botNum][brigidBotNum[botNum]];
-                                brigidBotNum[botNum]++;
+                                if (arduinoIDs[i] % 2 == 0){
+                                    i => brigidLightIDs[botNum][brigidLightNum[botNum]];
+                                    brigidLightNum[botNum]++;
+                                    <<<"Brigid assigned light shield : ", i, " to bot : ", botNum>>>;
+                                }
+                                else{
+                                    i => brigidBotIDs[botNum][brigidBotNum[botNum]];
+                                    brigidBotNum[botNum]++;
+                                    <<<"Brigid assigned solenoid shield : ", i, " to bot : ", botNum>>>;
+                                }
                             }
                             // homados
                             else if (board_type == 2){
-                                <<<"Homados assigned : ", i, " to bot : ", botNum>>>;
-                                i => homadosBotIDs[botNum][homadosBotNum[botNum]];
-                                homadosBotNum[botNum]++;
+                                if (arduinoIDs[i] % 2 == 1){
+                                    <<<"Homados assigned solenoid : ", i, " to bot : ", botNum>>>;
+                                    i => homadosBotIDs[botNum][homadosBotNum[botNum]];
+                                    homadosBotNum[botNum]++;
+                                }
+                                else {
+                                    <<<"Homados assigned light: ", i, " to bot : ", botNum>>>;
+                                    i => homadosLightIDs[botNum][homadosLightNum[botNum]];
+                                    homadosLightNum[botNum]++;
+                                }
                             }
                             // theia
                             else if (board_type == 4){
@@ -97,13 +115,13 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
 
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Initalizing Bots">>>;
-spork ~ bots[0].init(1, "/bot1", brigidBotIDs[0], homadosBotIDs[0], theiaBotIDs[0]);
-/*
+spork ~ bots[0].init(1, "/bot1", brigidBotIDs[0], homadosBotIDs[0], theiaBotIDs[0],
+brigidLightIDs[0], homadosLightIDs[0]);
 2::second => now;
-spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[1]);
+spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[1], brigidLightIDs[1], homadosLightIDs[1]);
 3::second => now;
-spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2]);
-*/
+spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2], brigidLightIDs[2], homadosLightIDs[2]);
+
 
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
@@ -114,6 +132,7 @@ fun void botListener() {
     int botMoods[bots.cap()];
     while(true) {
         for (int i; i < bots.cap(); i++) {
+            bots[i].determineState();
             if (bots[i].state != botMoods[i]) {
                 bots[i].state => botMoods[i];
                 <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
@@ -127,11 +146,18 @@ fun void botListener() {
                     if ( t != i && botMoods[t] == 0) {
                         1 => botMoods[t];
                         <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
+                        <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
                     }
                 }
             }
         }
-        5::second => now;
+        // poll the theia boards for 5 seconds or so
+        for (int t; t < 1; t++){
+            for (int i; i < 3; i++){
+                bots[i].pollTheia();
+                60::ms => now;
+            }
+        }
     }
 }
 

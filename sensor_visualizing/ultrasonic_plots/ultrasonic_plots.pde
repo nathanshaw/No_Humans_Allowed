@@ -7,7 +7,7 @@ OscP5 osc;
 
 // make a bar for each sensor on each bot
 int numSensors = 4;
-int numBots = 1;
+int numBots = 3;
 int windowWidth;
 int windowHeight;
 int sensorMaxValue = 255;
@@ -17,7 +17,7 @@ int windowHHop;
 int totalHHop;
 int totalVHop;
 int windowVHop;
-String botNames[] = {"/theia1"};
+String botNames[] = {"/theia1", "/theia2", "/theia3"};
 //int mostRescentReading = [];
 int mostRescentReading[] = new int[numBots*numSensors];
 
@@ -32,7 +32,7 @@ NetAddress destAddress;
 
 void setup() {
   size(1200, 300);
-  osc = new OscP5(this, 50010);
+  osc = new OscP5(this, 50002);
   destAddress = new NetAddress("127.0.0.1", 50000);
   windowHHop = int((width / 15) - numSensors);
   windowVHop = int((height / 15) - numBots);
@@ -57,10 +57,6 @@ void setup() {
         b);
     }
   }
-}
-
-void keyPressed() {
-  if (key == '1') pollSensor(1, 1);
 }
 
 // object for a slider
@@ -159,13 +155,6 @@ void draw() {
   }
 }
 
-void pollSensor(int _whichBot, int _whichSensor) {
-  OscMessage msg = new OscMessage("/theia1");
-  msg.add(_whichSensor);
-  msg.add(0);
-  osc.send(msg, destAddress);
-}
-
 void oscEvent(OscMessage theOscMessage) {
   String address = theOscMessage.addrPattern();
   int ultraNum = theOscMessage.get(0).intValue();
@@ -173,8 +162,7 @@ void oscEvent(OscMessage theOscMessage) {
   int offset = 0;
   if (address.equals("/theia1")) {
     // TODO, need to add in support for nultiple bots...
-    offset = 0;    
-    mostRescentReading[offset + ultraNum] = reading;
+    offset = 0;
   } else if (address.equals("/theia2")) {
     offset = numSensors - 1;
   } else if (address.equals("/theia3")) {
