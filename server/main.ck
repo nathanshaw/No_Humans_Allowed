@@ -71,8 +71,8 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
                 if ((arduinoIDs[i] % 100) / 10 == board_type) {
                     for (9 => int board_num; board_num > -1; board_num--) {
                         if ((arduinoIDs[i] % 10) == board_num) {
-                            <<<"BOARD is num               : ", 
-                            board_num, " - ", arduinoIDs[i]>>>;
+                            //  <<<"BOARD is num               : ", 
+                            //  board_num, " - ", arduinoIDs[i]>>>;
                             // brigid
                             if (board_type == 1){
                                 if (arduinoIDs[i] % 2 == 0){
@@ -129,13 +129,11 @@ int botPastMoods[3];
 <<<"Done with initializations">>>;
 fun void botListener() {
     // poll bots for their states, applies logic to change the behavior
-    <<<"Bot listener started">>>;
+    // <<<"Bot listener started">>>;
     int botMoods[bots.cap()];
     while(true) {
         for (int i; i < bots.cap(); i++) {
-            <<<"determining bot ", i, " state">>>;
             bots[i].determineState();
-            <<<"determined bot ", i, " state">>>;
             if (bots[i].state != botMoods[i]) {
                 botMoods[i] => botPastMoods[i];
                 bots[i].state => botMoods[i];
@@ -150,7 +148,7 @@ fun void botListener() {
                 if (botPastMoods[i] != 2) {
                     for (int t; t < botMoods.cap(); t++) {
                         if ( t != i && botMoods[t] == 0) {
-                            if (Math.random2f(0, 1.0) < 0.4){
+                            if (Math.random2f(0, 1.0) < 0.2){
                                 1 => botMoods[t];
                                 bots[t].setState(1);
                                 bots[t].wait(1000);

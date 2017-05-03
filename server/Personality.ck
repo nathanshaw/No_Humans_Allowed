@@ -13,14 +13,14 @@ public class Personality{
     [12, 12, 12, 12, 12, 12, 12] @=> int homadosLightSizes[];
 
     10 => int side_thresh;
-    120 => int bot1_front_mid_thresh;
+    50 => int bot1_front_mid_thresh;
     120 => int bot2_front_mid_thresh;
     120 => int bot3_front_mid_thresh;
-    120 => int bot4_front_mid_thresh;
+    90 => int bot4_front_mid_thresh;
     30 => int bot1_front_bottom_thresh;
-    30 => int bot2_front_bottom_thresh;
-    30 => int bot3_front_bottom_thresh;
-    30 => int bot4_front_bottom_thresh;
+    40 => int bot2_front_bottom_thresh;
+    42 => int bot3_front_bottom_thresh;
+    25 => int bot4_front_bottom_thresh;
 
     // chance that light goes off during productive states
     0.28 => float light_chance;
@@ -103,7 +103,7 @@ public class Personality{
             // <<<"bot ", botNum, " state ", state>>>;
             if (state == 1) {
                 // resting state
-                10::second => now;
+                5::second => now;
             }
             else if (state == 2) {
                 //  bports, hports, minWait, maxWait
@@ -124,7 +124,7 @@ public class Personality{
                     Math.random2(1,10) => int chance;
                     120 => int mint;
                     120 => int maxt;
-                    5 => int minv;
+                    10 => int minv;
                     18 => int maxv;
                     if (Math.random2f(0,1) < 0.1) {
                         minv * 2 => minv;
@@ -348,11 +348,19 @@ public class Personality{
 
     fun void smoothDistances() {
         for (int i; i < 4; i++){
+            /*
             float total;
             for (int t; t < FIFO_length; t++){
                 past_distances[i][t] + total => total;
             }
             total/10 => smoothed_distances[i];
+            */
+            if (FIFO_index > 0){
+                (past_distances[i][FIFO_index] + past_distances[i][FIFO_index-1]) * 0.5 => smoothed_distances[i];
+            }
+            else{
+                (past_distances[i][FIFO_index] + past_distances[i][9]) * 0.5 => smoothed_distances[i];
+            }
         }
     }
 
@@ -377,22 +385,31 @@ public class Personality{
                         num_under++;
                     }
                 }
-                if (num_under > 4) {
+                if (num_under > 2) {
                     2 => state;
                     <<<1, " determineState changed state to : ", state>>>;
                 }
             }
         } else if (smoothed_distances[0] < bot1_front_mid_thresh){
             if (state != 1) {
-                1 => state;
-                <<<1, " determineState changed state to : ", state>>>;
+                int num_under;
+                for (int i; i < past_distances[0].size(); i++) {
+                    if (past_distances[0][i] < bot1_front_mid_thresh) {
+                        num_under++;
+                    }
+                }
+                if (num_under > 3) {
+                    1 => state;
+                    <<<" determineState changed state to : ", state>>>;
+                }
             }
         } else{
             if (state != 0) {
                 0 => state;
-                <<< 1, " determineState changed state to : ", state>>>;
+                <<<" determineState changed state to : ", state>>>;
             }
         }
+
         if (smoothed_distances[1] < side_thresh){
             if (state != 2) {
                 int num_under;
@@ -407,7 +424,7 @@ public class Personality{
                 }
             }
         }
-        else if (smoothed_distances[2] < side_thresh && botNum != 2){
+        else if (smoothed_distances[2] < side_thresh && botNum > 2){
             if (state != 2) {
                 int num_under;
                 for (int i; i < past_distances[2].size(); i++) {

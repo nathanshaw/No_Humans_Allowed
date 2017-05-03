@@ -73,28 +73,22 @@ public class Handshake {
     // pings the Arduinos and returns their 'arduinoID'
     fun void handshake() {
         <<<"Starting Handshake">>>;
+        <<<"- - - - - - - - - - - - - - -">>>;
         [255, 255, 255] @=> int ping[];
         for (int i ; i < serial.cap(); i++) {
-            <<<"Looking at serial port : ", i>>>;
             serial[i].writeBytes(ping);
             serial[i].onByte() => now;
             serial[i].getByte() => int botID;
-            // <<<"bot id : ", botID>>>;
             serial[i].onByte() => now;
             serial[i].getByte() => int botType;
             if ( botType == 4){
-                <<<"found theia : botID : ", botID-1, " i - ", i>>>;
                 i => theiaBots[botID-1];
             }
-            // <<<"bot type : ", botType>>>;
             serial[i].onByte() => now;
             serial[i].getByte() => int arduinoID;
 
-            // <<<"arduino ID :", arduinoID>>>;
             (botID*100) + (botType*10) + (arduinoID) => robotID[i];
-            <<<"ROBOT ID : ", robotID[i]>>>;
-            40::ms => now;
-            <<<"- - - - - - - - - - - - - - -">>>;
+            10::ms => now;
         }
     }
 
