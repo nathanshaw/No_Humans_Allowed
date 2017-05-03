@@ -117,9 +117,9 @@ for (0 => int i; i < arduinoIDs.cap(); i++) {
 <<<"Initalizing Bots">>>;
 spork ~ bots[0].init(1, "/bot1", brigidBotIDs[0], homadosBotIDs[0], theiaBotIDs[0],
 brigidLightIDs[0], homadosLightIDs[0]);
-2::second => now;
+1.2::second => now;
 spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[1], brigidLightIDs[1], homadosLightIDs[1]);
-3::second => now;
+1.2::second => now;
 spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2], brigidLightIDs[2], homadosLightIDs[2]);
 
 
@@ -133,7 +133,9 @@ fun void botListener() {
     int botMoods[bots.cap()];
     while(true) {
         for (int i; i < bots.cap(); i++) {
+            <<<"determining bot ", i, " state">>>;
             bots[i].determineState();
+            <<<"determined bot ", i, " state">>>;
             if (bots[i].state != botMoods[i]) {
                 botMoods[i] => botPastMoods[i];
                 bots[i].state => botMoods[i];
@@ -148,11 +150,13 @@ fun void botListener() {
                 if (botPastMoods[i] != 2) {
                     for (int t; t < botMoods.cap(); t++) {
                         if ( t != i && botMoods[t] == 0) {
-                            1 => botMoods[t];
-                            bots[t].setState(1);
-                            bots[t].wait(1000);
-                            <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
-                            <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
+                            if (Math.random2f(0, 1.0) < 0.4){
+                                1 => botMoods[t];
+                                bots[t].setState(1);
+                                bots[t].wait(1000);
+                                <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
+                                <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
+                            }
                         }
                     }
                 }

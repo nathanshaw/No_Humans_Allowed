@@ -109,9 +109,9 @@ public class Personality{
                 //  bports, hports, minWait, maxWait
                if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
                     if (Math.random2(0, 100) < 70){
-                        angryStateOne(50, 10000);
+                        angryStateOne(50, 7000);
                     }else {
-                        angryStateTwo(50, 10000);
+                        angryStateTwo(50, 7000);
                     }
                 }
                 else{
@@ -122,10 +122,10 @@ public class Personality{
                 if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
                     // 80% of the time its normal
                     Math.random2(1,10) => int chance;
-                    100 => int mint;
-                    100 => int maxt;
-                    6 => int minv;
-                    15 => int maxv;
+                    120 => int mint;
+                    120 => int maxt;
+                    5 => int minv;
+                    18 => int maxv;
                     if (Math.random2f(0,1) < 0.1) {
                         minv * 2 => minv;
                         maxv * 2 => maxv;
@@ -178,6 +178,9 @@ public class Personality{
                     }
                 }
                 wait::ms => now;
+                if (Math.random2(0,20) < 1) {
+                    wait::ms => now;
+                }
             }
         }
     }
@@ -294,7 +297,7 @@ public class Personality{
                     for (int p; p < brigidPorts.size(); p++){
                         talk.talk.note(brigidPorts[p], i%6, 30 + Math.random2(0, 100));
                         Math.random2f(0, 1)::ms => now;
-                    }  
+                     }  
                     for (int p; p < bLightPorts.size(); p++){
                         talk.talk.note(bLightPorts[p], i%6, 30 + Math.random2(0, 100));
                     }
@@ -417,6 +420,7 @@ public class Personality{
                     <<<" determineState side 2 changed state to : ", state>>>;
                 }
             }
+            <<<"left determine State">>>;
         }
         else if (smoothed_distances[3] < side_thresh){
             if (state != 2) {
