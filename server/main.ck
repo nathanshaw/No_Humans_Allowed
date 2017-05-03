@@ -1,4 +1,4 @@
-// main.ck
+//b main.ck
 // CalArts Music Tech // MTIID4LIFE
 /*
 
@@ -123,6 +123,7 @@ spork ~ bots[1].init(2, "/bot2", brigidBotIDs[1], homadosBotIDs[1], theiaBotIDs[
 spork ~ bots[2].init(3, "/bot3", brigidBotIDs[2], homadosBotIDs[2], theiaBotIDs[2], brigidLightIDs[2], homadosLightIDs[2]);
 
 
+int botPastMoods[3];
 // create a shred that keeps track of the bots states
 <<<"- - - - - - - - - - - - - - - - - ">>>;
 <<<"Done with initializations">>>;
@@ -134,6 +135,7 @@ fun void botListener() {
         for (int i; i < bots.cap(); i++) {
             bots[i].determineState();
             if (bots[i].state != botMoods[i]) {
+                botMoods[i] => botPastMoods[i];
                 bots[i].state => botMoods[i];
                 <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
             }
@@ -141,12 +143,17 @@ fun void botListener() {
         for (int i; i < botMoods.cap(); i++) {
             // if one of the bots is angry
             if (botMoods[i] == 2) {
+                bots[i].setState(2);
                 // set the other bots to quiet
-                for (int t; t < botMoods.cap(); t++) {
-                    if ( t != i && botMoods[t] == 0) {
-                        1 => botMoods[t];
-                        <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
-                        <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
+                if (botPastMoods[i] != 2) {
+                    for (int t; t < botMoods.cap(); t++) {
+                        if ( t != i && botMoods[t] == 0) {
+                            1 => botMoods[t];
+                            bots[t].setState(1);
+                            bots[t].wait(1000);
+                            <<<"bot ", i, " is angry, changing bot ", t, " to quiet">>>;
+                            <<<"Bot Moods : ", botMoods[0], botMoods[1], botMoods[2]>>>;
+                        }
                     }
                 }
             }

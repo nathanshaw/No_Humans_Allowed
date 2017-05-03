@@ -12,6 +12,20 @@ public class Personality{
     [12, 12, 12, 12, 12, 12, 12] @=> int homadosSizes[];
     [12, 12, 12, 12, 12, 12, 12] @=> int homadosLightSizes[];
 
+    10 => int side_thresh;
+    120 => int bot1_front_mid_thresh;
+    120 => int bot2_front_mid_thresh;
+    120 => int bot3_front_mid_thresh;
+    120 => int bot4_front_mid_thresh;
+    30 => int bot1_front_bottom_thresh;
+    30 => int bot2_front_bottom_thresh;
+    30 => int bot3_front_bottom_thresh;
+    30 => int bot4_front_bottom_thresh;
+
+    // chance that light goes off during productive states
+    0.28 => float light_chance;
+    0.955 => float productivity;
+
     //FIFO stuff
     int FIFO_index;
     10 => int FIFO_length;
@@ -89,15 +103,15 @@ public class Personality{
             // <<<"bot ", botNum, " state ", state>>>;
             if (state == 1) {
                 // resting state
-                2::second => now;
+                10::second => now;
             }
             else if (state == 2) {
                 //  bports, hports, minWait, maxWait
-                if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
+               if (brigidPorts.size() > 0 || homadosPorts.size() > 0){
                     if (Math.random2(0, 100) < 70){
-                        angryStateOne(50, 2750);
+                        angryStateOne(50, 10000);
                     }else {
-                        angryStateTwo(50, 2750);
+                        angryStateTwo(50, 10000);
                     }
                 }
                 else{
@@ -110,8 +124,15 @@ public class Personality{
                     Math.random2(1,10) => int chance;
                     100 => int mint;
                     100 => int maxt;
-                    12 => int minv;
-                    17 => int maxv;
+                    6 => int minv;
+                    15 => int maxv;
+                    if (Math.random2f(0,1) < 0.1) {
+                        minv * 2 => minv;
+                        maxv * 2 => maxv;
+                    } else if (Math.random2f(0,1) < 0.05) {
+                        minv * 3 => minv;
+                        maxv * 3 => maxv;
+                    }
                     Math.random2(1,2) => int scaler;
                     Math.random2(1,2) * scaler => scaler;
                     if (chance <  9){
@@ -137,14 +158,24 @@ public class Personality{
         <<<wait, " - ", vel, " - Trigger ProductiveStateOne on bot : ", botNum, " w:",
         wait,
         " v: ", vel>>>;
-        for (int i; i < 48; i++){
+        for (int i; i < 96; i++){
             // check state to break out of loop when needed
             if (state == 0){
                 for (int b; b < brigidPorts.size(); b++){
-                    talk.talk.note(brigidPorts[b], i%6, vel + Math.random2(1,5));
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(brigidPorts[b], i%6, vel + Math.random2(1,5));
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(bLightPorts[b], i&6, vel);
+                        }
+                    }
                 }
                 for (int h; h < homadosPorts.size(); h++){
-                    talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2 + Math.random2(1,5));
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2 + Math.random2(1,5));
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(hLightPorts[h], i&6, vel);
+                        }
+                    }
                 }
                 wait::ms => now;
             }
@@ -159,10 +190,20 @@ public class Personality{
         for (int i; i < 384; i++){
             if (state == 0){
                 for (int b; b < brigidPorts.size(); b++){
-                    talk.talk.note(brigidPorts[b], i%6, vel + Math.random2(1,5));
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(brigidPorts[b], i%6, vel + Math.random2(1,5));
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(bLightPorts[b], i&6, vel);
+                        }
+                    }
                 }
                 for (int h; h < homadosPorts.size(); h++){
-                    talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2 + Math.random2(1,5));
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2 + Math.random2(1,5));
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(hLightPorts[h], i&6, vel);
+                        }
+                    }
                 }
                 // 1/3 of the time it waits twice as long
                 if (i%3 == 2){
@@ -173,6 +214,11 @@ public class Personality{
         }
     }
     
+
+    fun void wait(int l) {
+        l::ms => now;
+    }
+
     fun void productiveStateThree(int wait, int vel) {
         <<<wait, " - ", vel, " - Trigger ProductiveStateThree on bot : ", botNum, " w:",
         wait,
@@ -180,10 +226,20 @@ public class Personality{
         for (int i; i < 384; i++){
             if (state == 0){
                 for (int b; b < brigidPorts.size(); b++){
-                    talk.talk.note(brigidPorts[b], i%6, vel);
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(brigidPorts[b], i%6, vel);
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(bLightPorts[b], i&6, vel);
+                        }
+                    }
                 }
                 for (int h; h < homadosPorts.size(); h++){
-                    talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2);
+                    if (Math.random2f(0,1) < productivity) {
+                        talk.talk.note(homadosPorts[h], i%homadosSizes[h], vel*2);
+                        if (Math.random2f(0, 1) < light_chance){
+                            talk.talk.note(hLightPorts[h], i&6, vel);
+                        }
+                    }
                 }
                 // little funky
                 if (i%5 < 3){
@@ -210,26 +266,24 @@ public class Personality{
                     }  
                     for (int p; p < bLightPorts.size(); p++){
                         talk.talk.note(bLightPorts[p], i%6, 30 + Math.random2(0, 100));
-                        Math.random2(0, 5)::ms => now;
                     }
                 }
                 // for homados
-                for (int i; i < 48; i++){
+                for (int i; i < 96; i++){
                     for (int p; p < homadosPorts.size(); p++){
                         talk.talk.note(homadosPorts[p], i%homadosSizes[p], 30 + Math.random2(0, 100));
                         Math.random2(0, 5)::ms => now;
                     }  
                     for (int p; p < hLightPorts.size(); p++){
                         talk.talk.note(hLightPorts[p], i%homadosLightSizes[p], 30 + Math.random2(0, 100));
-                        Math.random2(0, 5)::ms => now;
                     }  
                 }
                 // wait a random amount of time, before repeating
                 Math.random2(minWait, maxWait)::ms => now;
             }
         }
-        <<<"exiting angry state one">>>;
     } 
+    
     fun void angryStateTwo(int minWait, int maxWait) {
         <<<"Trigger angryStateTwo on bot : ", botNum>>>;
         // turn on all solinoids at a random interval 16 times
@@ -243,25 +297,22 @@ public class Personality{
                     }  
                     for (int p; p < bLightPorts.size(); p++){
                         talk.talk.note(bLightPorts[p], i%6, 30 + Math.random2(0, 100));
-                        Math.random2f(0, 1)::ms => now;
                     }
                 }
                 // for homados
-                for (int i; i < 48; i++){
+                for (int i; i < 96; i++){
                     for (int p; p < homadosPorts.size(); p++){
                         talk.talk.note(homadosPorts[p], i%homadosSizes[p], 30 + Math.random2(0, 100));
                         Math.random2f(0, 1)::ms => now;
                     }  
                     for (int p; p < hLightPorts.size(); p++){
                         talk.talk.note(hLightPorts[p], i%homadosLightSizes[p], 30 + Math.random2(0, 100));
-                        Math.random2f(0, 1)::ms => now;
                     }  
                 }
                 // wait a random amount of time, before repeating
                 (Math.random2f(minWait, maxWait)*0.3)::ms => now;
             }
         }
-        <<<"exiting angry state two">>>;
     } 
 
     // theia listener
@@ -315,12 +366,20 @@ public class Personality{
                 smoothed_distances[1], "-",
                 smoothed_distances[2], "-", smoothed_distances[3]>>>;
         }
-        if (smoothed_distances[0] < 45){
+        if (smoothed_distances[0] < bot1_front_bottom_thresh){
             if (state != 2) {
-                2 => state;
-                <<<1, " determineState changed state to : ", state>>>;
+                int num_under;
+                for (int i; i < past_distances[0].size(); i++) {
+                    if (past_distances[0][i] < bot1_front_bottom_thresh) {
+                        num_under++;
+                    }
+                }
+                if (num_under > 4) {
+                    2 => state;
+                    <<<1, " determineState changed state to : ", state>>>;
+                }
             }
-        } else if (smoothed_distances[0] < 390){
+        } else if (smoothed_distances[0] < bot1_front_mid_thresh){
             if (state != 1) {
                 1 => state;
                 <<<1, " determineState changed state to : ", state>>>;
@@ -331,24 +390,51 @@ public class Personality{
                 <<< 1, " determineState changed state to : ", state>>>;
             }
         }
-        if (smoothed_distances[1] < 10){
+        if (smoothed_distances[1] < side_thresh){
             if (state != 2) {
-                2 => state;
-                <<<1, " determineState changed state to : ", state>>>;
+                int num_under;
+                for (int i; i < past_distances[1].size(); i++) {
+                    if (past_distances[1][i] < side_thresh) {
+                        num_under++;
+                    }
+                }
+                if (num_under > 4) {
+                    2 => state;
+                    <<<1, " determineState side 1 changed state to : ", state>>>;
+                }
             }
         }
-        else if (smoothed_distances[2] < 10){
+        else if (smoothed_distances[2] < side_thresh && botNum != 2){
             if (state != 2) {
-                2 => state;
-                <<<2, " determineState changed state to : ", state>>>;
+                int num_under;
+                for (int i; i < past_distances[2].size(); i++) {
+                    if (past_distances[2][i] < side_thresh) {
+                        num_under++;
+                    }
+                }
+                if (num_under > 4) {
+                    2 => state;
+                    <<<" determineState side 2 changed state to : ", state>>>;
+                }
             }
         }
-        else if (smoothed_distances[3] < 10){
+        else if (smoothed_distances[3] < side_thresh){
             if (state != 2) {
-                2 => state;
-                <<<3, " determineState changed state to : ", state>>>;
+                int num_under;
+                for (int i; i < past_distances[3].size(); i++) {
+                    if (past_distances[3][i] < side_thresh) {
+                        num_under++;
+                    }
+                }
+                if (num_under > 4) {
+                    2 => state;
+                    <<<" determineState side 3 changed state to : ", state>>>;
+                }
             }
         }
+    }
+    fun void setState(int stateToSet) {
+        stateToSet => state;
     }
     
     // tells child class to only send theiaPorts gc messages

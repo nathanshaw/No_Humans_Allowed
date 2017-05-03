@@ -9,10 +9,12 @@ public class Handshake {
     OscMsg msg;
     int theiaBots[3];
     ("localhost", 50003) => out.dest;
-    
+
+    100::ms => now;
     SerialIO.list() @=> string list[];
     int serial_port[list.cap()];
-    
+    100::ms => now;
+
     // calls num_ports() to find how many USB ports are available
     SerialIO serial[num_ports()];
     int robotID[serial.cap()];
